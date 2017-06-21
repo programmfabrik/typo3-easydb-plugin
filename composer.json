@@ -1,0 +1,39 @@
+{
+    "name": "easydb/typo3-integration",
+    "type": "typo3-cms-extension",
+    "description" : "Integration of easydb asset management in TYPO3 CMS",
+    "license": "GPL-2.0+",
+    "authors": [
+        {
+            "name": "Helmut Hummel",
+            "email": "info@helhum.io",
+            "role": "Developer",
+            "homepage": "https://helhum.io"
+        }
+    ],
+    "require": {
+        "php": ">=5.5 <7.2",
+        "typo3/cms-core": "^7.6 || ^8.7"
+    },
+    "require-dev": {
+        "nimut/testing-framework": "^1.1.8",
+        "typo3/cms": "^8.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Easydb\\Typo3Integration\\": "Classes"
+        }
+    },
+    "replace": {
+        "easydb": "self.version"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.x-dev"
+        },
+        "typo3/cms": {
+            "cms-package-dir": "{$vendor-dir}/typo3/cms",
+            "web-dir": ".Build/Web"
+        }
+    }
+}
