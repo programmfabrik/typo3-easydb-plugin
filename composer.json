@@ -24,6 +24,11 @@
             "Easydb\\Typo3Integration\\": "Classes"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Easydb\\Typo3Integration\\Tests\\": "Tests"
+        }
+    },
     "replace": {
         "easydb": "self.version"
     },
