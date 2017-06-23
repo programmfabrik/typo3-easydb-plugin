@@ -52,7 +52,7 @@ class AjaxDispatcher
         $suitableRequestHandlers = [];
         foreach ($this->requestHandlers as $requestHandlerClassName) {
             /** @var RequestHandlerInterface $requestHandler */
-            $requestHandler = GeneralUtility::makeInstance($requestHandlerClassName, $this);
+            $requestHandler = GeneralUtility::makeInstance($requestHandlerClassName);
             if ($requestHandler->canHandleRequest($request)) {
                 $priority = $requestHandler->getPriority();
                 if (isset($suitableRequestHandlers[$priority])) {
