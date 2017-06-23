@@ -23,7 +23,9 @@ namespace Easydb\Typo3Integration\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Resource\DuplicationBehavior;
+use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -52,16 +54,33 @@ class ImportFilesController
 
         $addedFiles = [];
 
+        $existingFiles = $targetFolder->getFiles();
+
+        $easydbFiles = [];
+
+        foreach ($existingFiles as $file) {
+            if ($easydbUid = $file->getProperty('easydb_uid')) {
+                $easydbFiles[$easydbUid] = $file;
+            }
+        }
+
         foreach ($easyDBRequest['files'] as $fileData) {
             $fileContent = file_get_contents($fileData['url']);
             $tempFileName = GeneralUtility::tempnam('easydb_');
             file_put_contents($tempFileName, $fileContent);
             $action = 'insert';
-            $duplicationBehavior = DuplicationBehavior::REPLACE;
+            $duplicationBehavior = DuplicationBehavior::RENAME;
+            // TODO. handle the case this file has been imported to a different location?
             if ($targetFolder->hasFile($fileData['filename'])) {
-                $action = 'update';
+                if (!empty($easydbFiles[$fileData['uid']])) {
+                    $action = 'update';
+                    $duplicationBehavior = DuplicationBehavior::REPLACE;
+                } else {
+                    // TODO: handle this case differently than renaming?
+                }
             }
             $uploadedFile = $targetFolder->addFile($tempFileName, $fileData['filename'], $duplicationBehavior);
+            $this->addOrUpdateEasydbUid($uploadedFile, $fileData);
             $addedFiles[] = [
                 'uid' => $fileData['uid'],
                 'url' => GeneralUtility::locationHeaderUrl($uploadedFile->getPublicUrl()),
@@ -78,5 +97,21 @@ class ImportFilesController
         $response->getBody()->write(json_encode($easyDBResponse));
 
         return $response;
+    }
+
+    private function addOrUpdateEasydbUid(File $file, array $easydbFileData)
+    {
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'sys_file' => [
+                    $file->getUid() => [
+                        'easydb_uid' => $easydbFileData['uid'],
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
     }
 }
