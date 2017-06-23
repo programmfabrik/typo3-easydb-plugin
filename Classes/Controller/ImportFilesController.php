@@ -73,7 +73,7 @@ class ImportFilesController
 
         $easyDBResponse = [
             'files' => $addedFiles,
-            'took' => GeneralUtility::milliseconds() - $GLOBALS['PARSETIME_START']
+            'took' => GeneralUtility::milliseconds() - $GLOBALS['PARSETIME_START'],
         ];
         $response->getBody()->write(json_encode($easyDBResponse));
 

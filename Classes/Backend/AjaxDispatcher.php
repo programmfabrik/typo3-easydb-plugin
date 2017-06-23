@@ -44,8 +44,8 @@ class AjaxDispatcher
      * Fetches the request handler that suits the best based on the priority and the interface
      *
      * @param ServerRequestInterface $request
-     * @return RequestHandlerInterface[]
      * @throws \TYPO3\CMS\Core\Exception
+     * @return RequestHandlerInterface[]
      */
     private function resolveRequestHandlers(ServerRequestInterface $request)
     {

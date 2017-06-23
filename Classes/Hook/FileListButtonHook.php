@@ -98,8 +98,8 @@ EOF;
     }
 
     /**
-     * @return string
      * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
+     * @return string
      */
     private function getCallBackUrl()
     {

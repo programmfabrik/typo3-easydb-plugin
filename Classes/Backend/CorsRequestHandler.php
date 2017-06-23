@@ -64,8 +64,8 @@ class CorsRequestHandler implements RequestHandlerInterface
     /**
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
-     * @return ResponseInterface
      * @throws \InvalidArgumentException
+     * @return ResponseInterface
      */
     public function handleRequest(ServerRequestInterface $request, ResponseInterface $response)
     {
