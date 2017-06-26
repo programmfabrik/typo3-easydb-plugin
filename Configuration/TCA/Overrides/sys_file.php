@@ -5,5 +5,5 @@ $GLOBALS['TCA']['sys_file']['columns']['easydb_uid'] = [
         'readOnly' => true,
         'type' => 'input',
         'size' => 255,
-    ]
+    ],
 ];

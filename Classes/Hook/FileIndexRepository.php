@@ -27,5 +27,4 @@ class FileIndexRepository extends \TYPO3\CMS\Core\Resource\Index\FileIndexReposi
     {
         $this->fields[] = 'easydb_uid';
     }
-
 }
