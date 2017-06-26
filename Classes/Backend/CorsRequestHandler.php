@@ -21,6 +21,7 @@ namespace Easydb\Typo3Integration\Backend;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Easydb\Typo3Integration\ExtensionConfig;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -30,6 +31,11 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class CorsRequestHandler implements RequestHandlerInterface
 {
+    /**
+     * @var ExtensionConfig
+     */
+    private $config;
+
     /**
      * Hard coded list of allowed CORS request methods
      *
@@ -43,6 +49,11 @@ class CorsRequestHandler implements RequestHandlerInterface
      * @var array
      */
     private $allowedHeaders = ['X-Requested-With'];
+
+    public function __construct(ExtensionConfig $config = null)
+    {
+        $this->config = $config ?: new ExtensionConfig();
+    }
 
     /**
      * Only send CORS headers if origin header is sent and
@@ -134,8 +145,7 @@ class CorsRequestHandler implements RequestHandlerInterface
      */
     private function isAllowedOrigin($origin)
     {
-        // TODO: pull in the allowed origins from configuration
-        return true;
+        return $this->config->get('allowedOrigin') === $origin;
     }
 
     /**

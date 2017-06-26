@@ -6,6 +6,9 @@
 			<trans-unit id="addFiles">
 				<source>Add files from easydb</source>
 			</trans-unit>
+			<trans-unit id="config.easydbServerUrl">
+				<source>URL to your easydb server</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

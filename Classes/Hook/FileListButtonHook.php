@@ -21,6 +21,7 @@ namespace Easydb\Typo3Integration\Hook;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Easydb\Typo3Integration\ExtensionConfig;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Core\Imaging\Icon;
@@ -33,6 +34,11 @@ use TYPO3\CMS\Lang\LanguageService;
  */
 class FileListButtonHook
 {
+    /**
+     * @var ExtensionConfig
+     */
+    private $config;
+
     /**
      * @var IconFactory
      */
@@ -48,8 +54,9 @@ class FileListButtonHook
      */
     private $uriBuilder;
 
-    public function __construct(IconFactory $iconFactory = null, LanguageService $languageService = null, UriBuilder $uriBuilder = null)
+    public function __construct(ExtensionConfig $config = null, IconFactory $iconFactory = null, LanguageService $languageService = null, UriBuilder $uriBuilder = null)
     {
+        $this->config = $config ?: new ExtensionConfig();
         $this->iconFactory = $iconFactory ?: GeneralUtility::makeInstance(IconFactory::class);
         $this->languageService = $languageService ?: $GLOBALS['LANG'];
         $this->uriBuilder = $uriBuilder ?: GeneralUtility::makeInstance(UriBuilder::class);
@@ -88,9 +95,9 @@ class FileListButtonHook
             ]
         )));
         $windowSize = $this->getWindowSize();
-
+        $serverUrl = rtrim($this->config->get('serverUrl'), '/');
         return <<<EOF
-javascript:window.open("http://master.5.easydb.de/?typo3filepicker=$filePickerArgument",
+javascript:window.open("${serverUrl}?typo3filepicker=${filePickerArgument}",
     "easydb_picker",
     "width=${windowSize['width']},height=${windowSize['height']},status=0,menubar=0,resizable=1,location=0,directories=0,scrollbars=1,toolbar=0"
 );
