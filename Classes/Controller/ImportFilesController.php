@@ -25,6 +25,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Database\RelationHandler;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Http\UploadedFile;
 use TYPO3\CMS\Core\Resource\DuplicationBehavior;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
@@ -51,7 +52,9 @@ class ImportFilesController
     {
         $targetFolderId = $request->getQueryParams()['id'];
         $targetFolder = $this->resourceFactory->getFolderObjectFromCombinedIdentifier($targetFolderId);
-        $easyDBRequest = \json_decode($request->getParsedBody()['body'], true);
+        $requestBody = $request->getParsedBody();
+        $easyDBRequest = \json_decode($requestBody['body'], true);
+        $easydbUploadedFiles = $request->getUploadedFiles() ? $request->getUploadedFiles()['files'] : [];
 
         $existingEasydbFiles = [];
         foreach ($targetFolder->getFiles() as $file) {
@@ -62,9 +65,19 @@ class ImportFilesController
 
         $addedFiles = [];
         foreach ($easyDBRequest['files'] as $fileData) {
-            $fileContent = file_get_contents($fileData['url']);
             $tempFileName = GeneralUtility::tempnam('easydb_');
-            file_put_contents($tempFileName, $fileContent);
+            if (empty($easydbUploadedFiles)) {
+                $fileContent = GeneralUtility::getUrl($fileData['url']);
+                file_put_contents($tempFileName, $fileContent);
+            } else {
+                /** @var UploadedFile $easydbUploadedFile */
+                foreach ($easydbUploadedFiles as $easydbUploadedFile) {
+                    if ($easydbUploadedFile->getClientFilename() !== $fileData['filename']) {
+                        continue;
+                    }
+                    $easydbUploadedFile->moveTo($tempFileName);
+                }
+            }
             $action = 'insert';
             // TODO. handle the case this file has been imported to a different location?
             if (!empty($existingEasydbFiles[$fileData['uid']])) {
