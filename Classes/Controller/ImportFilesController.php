@@ -23,6 +23,7 @@ namespace Easydb\Typo3Integration\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Database\RelationHandler;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Resource\DuplicationBehavior;
 use TYPO3\CMS\Core\Resource\File;
@@ -101,12 +102,28 @@ class ImportFilesController
 
     private function addOrUpdateEasydbUid(File $file, array $easydbFileData)
     {
+        $relationHandler = GeneralUtility::makeInstance(RelationHandler::class);
+        $relationHandler->start(
+            $file->getUid(),
+            'sys_file_metadata',
+            '',
+            $file->getUid(),
+            'sys_file',
+            $GLOBALS['TCA']['sys_file']['columns']['metadata']['config']
+        );
+        $metaDataRecords = $relationHandler->getValueArray();
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $dataHandler->start(
             [
                 'sys_file' => [
                     $file->getUid() => [
                         'easydb_uid' => $easydbFileData['uid'],
+                    ],
+                ],
+                'sys_file_metadata' => [
+                    // TODO handle meta data translations
+                    $metaDataRecords[0] => [
+                        'title' => $easydbFileData['title'],
                     ],
                 ],
             ],
