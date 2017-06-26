@@ -53,34 +53,30 @@ class ImportFilesController
         $targetFolder = $this->resourceFactory->getFolderObjectFromCombinedIdentifier($targetFolderId);
         $easyDBRequest = \json_decode($request->getParsedBody()['body'], true);
 
-        $addedFiles = [];
-
-        $existingFiles = $targetFolder->getFiles();
-
-        $easydbFiles = [];
-
-        foreach ($existingFiles as $file) {
+        $existingEasydbFiles = [];
+        foreach ($targetFolder->getFiles() as $file) {
             if ($easydbUid = $file->getProperty('easydb_uid')) {
-                $easydbFiles[$easydbUid] = $file;
+                $existingEasydbFiles[$easydbUid] = $file;
             }
         }
 
+        $addedFiles = [];
         foreach ($easyDBRequest['files'] as $fileData) {
             $fileContent = file_get_contents($fileData['url']);
             $tempFileName = GeneralUtility::tempnam('easydb_');
             file_put_contents($tempFileName, $fileContent);
             $action = 'insert';
-            $duplicationBehavior = DuplicationBehavior::RENAME;
             // TODO. handle the case this file has been imported to a different location?
-            if ($targetFolder->hasFile($fileData['filename'])) {
-                if (!empty($easydbFiles[$fileData['uid']])) {
-                    $action = 'update';
-                    $duplicationBehavior = DuplicationBehavior::REPLACE;
-                } else {
-                    // TODO: handle this case differently than renaming?
-                }
+            if (!empty($existingEasydbFiles[$fileData['uid']])) {
+                $action = 'update';
+                /** @var File $existingFile */
+                $existingFile = $existingEasydbFiles[$fileData['uid']];
+                $existingFile->getStorage()->replaceFile($existingFile, $tempFileName);
+                $existingFile->rename($fileData['filename']);
+                $uploadedFile = $existingFile;
+            } else {
+                $uploadedFile = $targetFolder->addFile($tempFileName, $fileData['filename'], DuplicationBehavior::RENAME);
             }
-            $uploadedFile = $targetFolder->addFile($tempFileName, $fileData['filename'], $duplicationBehavior);
             $this->addOrUpdateEasydbUid($uploadedFile, $fileData);
             $addedFiles[] = [
                 'uid' => $fileData['uid'],
