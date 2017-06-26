@@ -75,7 +75,7 @@ class ImportFilesController
                     if ($easydbUploadedFile->getClientFilename() !== $fileData['filename']) {
                         continue;
                     }
-                    $easydbUploadedFile->moveTo($tempFileName);
+                    file_put_contents($tempFileName, $easydbUploadedFile->getStream());
                 }
             }
             $action = 'insert';
