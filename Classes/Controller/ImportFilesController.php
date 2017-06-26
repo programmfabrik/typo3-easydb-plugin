@@ -68,18 +68,22 @@ class ImportFilesController
             $tempFileName = GeneralUtility::tempnam('easydb_');
             if (empty($easydbUploadedFiles)) {
                 $fileContent = GeneralUtility::getUrl($fileData['url']);
-                file_put_contents($tempFileName, $fileContent);
             } else {
                 /** @var UploadedFile $easydbUploadedFile */
                 foreach ($easydbUploadedFiles as $easydbUploadedFile) {
                     if ($easydbUploadedFile->getClientFilename() !== $fileData['filename']) {
                         continue;
                     }
-                    file_put_contents($tempFileName, $easydbUploadedFile->getStream());
+                    $fileContent = $easydbUploadedFile->getStream();
                 }
             }
+            if (!isset($fileContent)) {
+                throw new \RuntimeException('Invalid data sent for file ' . $fileData['filename'], 1498474983);
+            }
+            file_put_contents($tempFileName, $fileContent);
+            unset($fileContent);
+
             $action = 'insert';
-            // TODO. handle the case this file has been imported to a different location?
             if (!empty($existingEasydbFiles[$fileData['uid']])) {
                 $action = 'update';
                 /** @var File $existingFile */
