@@ -25,6 +25,8 @@ use Easydb\Typo3Integration\Controller\ImportFilesController;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\FormProtection\AbstractFormProtection;
+use TYPO3\CMS\Core\FormProtection\FormProtectionFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -39,14 +41,23 @@ class DefaultRequestHandler implements RequestHandlerInterface
     private $userAuthentication;
 
     /**
+     * @var AbstractFormProtection
+     */
+    private $formProtection;
+
+    /**
      * @var ImportFilesController
      */
     private $importFilesController;
 
-    public function __construct(BackendUserAuthentication $userAuthentication = null, ImportFilesController $importFilesController = null)
-    {
-        $this->importFilesController = $importFilesController ?: GeneralUtility::makeInstance(ImportFilesController::class);
+    public function __construct(
+        BackendUserAuthentication $userAuthentication = null,
+        AbstractFormProtection $formProtection = null,
+        ImportFilesController $importFilesController = null
+    ) {
         $this->userAuthentication = $userAuthentication ?: $GLOBALS['BE_USER'];
+        $this->formProtection = $formProtection ?: FormProtectionFactory::get('backend');
+        $this->importFilesController = $importFilesController ?: GeneralUtility::makeInstance(ImportFilesController::class);
     }
 
     /**
@@ -55,7 +66,13 @@ class DefaultRequestHandler implements RequestHandlerInterface
      */
     public function canHandleRequest(ServerRequestInterface $request)
     {
-        return !empty($this->userAuthentication->user['uid']) && $request->getMethod() !== 'OPTIONS';
+        return !empty($this->userAuthentication->user['uid'])
+            && $this->formProtection->validateToken(
+                $request->getQueryParams()['importToken'],
+                'easydb',
+                'fileImport'
+            )
+            && $request->getMethod() !== 'OPTIONS';
     }
 
     public function getPriority()

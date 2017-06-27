@@ -26,6 +26,8 @@ use Easydb\Typo3Integration\Resource\FileUpdater;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\FormProtection\AbstractFormProtection;
+use TYPO3\CMS\Core\FormProtection\FormProtectionFactory;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Page\PageRenderer;
@@ -73,6 +75,11 @@ class FileListButtonHook
      */
     private $backendUserAuthentication;
 
+    /**
+     * @var AbstractFormProtection
+     */
+    private $formProtection;
+
     public function __construct(
         ExtensionConfig $config = null,
         IconFactory $iconFactory = null,
@@ -80,7 +87,8 @@ class FileListButtonHook
         UriBuilder $uriBuilder = null,
         PageRenderer $pageRenderer = null,
         ResourceFactory $resourceFactory = null,
-        BackendUserAuthentication $backendUserAuthentication = null
+        BackendUserAuthentication $backendUserAuthentication = null,
+        AbstractFormProtection $formProtection = null
     ) {
         $this->config = $config ?: new ExtensionConfig();
         $this->iconFactory = $iconFactory ?: GeneralUtility::makeInstance(IconFactory::class);
@@ -89,6 +97,7 @@ class FileListButtonHook
         $this->pageRenderer = $pageRenderer ?: GeneralUtility::makeInstance(PageRenderer::class);
         $this->resourceFactory = $resourceFactory ?: GeneralUtility::makeInstance(ResourceFactory::class);
         $this->backendUserAuthentication = $backendUserAuthentication ?: $GLOBALS['BE_USER'];
+        $this->formProtection = $formProtection ?: FormProtectionFactory::get();
     }
 
     public function getButtons(array $params, ButtonBar $buttonBar)
@@ -141,6 +150,7 @@ class FileListButtonHook
     }
 
     /**
+     * @throws \InvalidArgumentException
      * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
      * @return string
      */
@@ -150,6 +160,7 @@ class FileListButtonHook
             'ajax_easydb_import',
             [
                 'id' => isset($_GET['id']) ? $_GET['id'] : $this->getRootLevelFolder(),
+                'importToken' => $this->formProtection->generateToken('easydb', 'fileImport'),
             ],
             UriBuilder::ABSOLUTE_URL
         );
