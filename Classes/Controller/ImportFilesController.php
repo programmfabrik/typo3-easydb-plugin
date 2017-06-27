@@ -75,6 +75,7 @@ class ImportFilesController
             if ($fileUpdater->hasFile($fileData['uid'])) {
                 $action = 'update';
             }
+            // TODO: Handle error case
             $addedFiles[] = $fileUpdater->addOrUpdateFile($fileData);
             $this->addFlashMessage($action . 'File', [$fileData['filename']]);
         }
