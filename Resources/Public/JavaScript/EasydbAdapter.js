@@ -11,9 +11,15 @@ define(['jquery'], function($) {
 		 */
 		filePicker: null,
 
+		/**
+		 * Value map of events already handled
+		 */
+		eventsHandled: {},
+
 		openPicker: function(event) {
 			event.preventDefault();
 			var $arguments = $(event.target).data('arguments');
+			easydbAdapter.eventsHandled = {};
 			easydbAdapter.filePicker = top.window.open(
 				$arguments['targetUrl'],
 				'easydb_picker',
@@ -32,12 +38,15 @@ define(['jquery'], function($) {
 
 		reloadWindow: function(event) {
 			if (event.data['easydb']) {
-				if (event.data['easydb']['action'] === 'reload') {
+				if (event.data['easydb']['action'] === 'reload' && !easydbAdapter.eventsHandled[event.data['easydb']['action']]) {
 					window.location.reload();
 					easydbAdapter.closePicker();
+					easydbAdapter.eventsHandled['reload'] = true;
+					easydbAdapter.eventsHandled['close'] = true;
 				}
-				if (event.data['easydb']['action'] === 'close') {
+				if (event.data['easydb']['action'] === 'close' && !easydbAdapter.eventsHandled[event.data['easydb']['action']]) {
 					window.location.reload();
+					easydbAdapter.eventsHandled['close'] = true;
 				}
 			}
 		},
