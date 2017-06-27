@@ -1,6 +1,7 @@
 <?php
 namespace Easydb\Typo3Integration\Resource;
 
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\RelationHandler;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Resource\DuplicationBehavior;
@@ -126,7 +127,8 @@ class FileUpdater
                 ],
                 'sys_file_metadata' => [
                     // TODO handle meta data translations
-                    $metaDataRecords[0] => [
+                    $this->getDefaultLanguageMetaDataRecord($metaDataRecords) => [
+                        // TODO: add further meta data properties once provided
                         'title' => $fileData['title'],
                     ],
                 ],
@@ -134,5 +136,16 @@ class FileUpdater
             []
         );
         $dataHandler->process_datamap();
+    }
+
+    private function getDefaultLanguageMetaDataRecord(array $metaDataUids)
+    {
+        foreach ($metaDataUids as $metaDataUid) {
+            $row = BackendUtility::getRecord('sys_file_metadata', $metaDataUid);
+            if ((string)$row['sys_language_uid'] === '0') {
+                return $metaDataUid;
+            }
+        }
+        return current($metaDataUids);
     }
 }
