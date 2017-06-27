@@ -22,11 +22,13 @@ namespace Easydb\Typo3Integration\Hook;
  ***************************************************************/
 
 use Easydb\Typo3Integration\ExtensionConfig;
+use Easydb\Typo3Integration\Resource\FileUpdater;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Lang\LanguageService;
 
@@ -60,18 +62,25 @@ class FileListButtonHook
      */
     private $pageRenderer;
 
+    /**
+     * @var ResourceFactory
+     */
+    private $resourceFactory;
+
     public function __construct(
         ExtensionConfig $config = null,
         IconFactory $iconFactory = null,
         LanguageService $languageService = null,
         UriBuilder $uriBuilder = null,
-        PageRenderer $pageRenderer = null
+        PageRenderer $pageRenderer = null,
+        ResourceFactory $resourceFactory = null
     ) {
         $this->config = $config ?: new ExtensionConfig();
         $this->iconFactory = $iconFactory ?: GeneralUtility::makeInstance(IconFactory::class);
         $this->languageService = $languageService ?: $GLOBALS['LANG'];
         $this->uriBuilder = $uriBuilder ?: GeneralUtility::makeInstance(UriBuilder::class);
         $this->pageRenderer = $pageRenderer ?: GeneralUtility::makeInstance(PageRenderer::class);
+        $this->resourceFactory = $resourceFactory ?: GeneralUtility::makeInstance(ResourceFactory::class);
     }
 
     public function getButtons(array $params, ButtonBar $buttonBar)
@@ -115,6 +124,7 @@ class FileListButtonHook
         $filePickerArgument = \rawurlencode(\base64_encode(\json_encode(
             [
                 'callbackurl' => $this->getCallBackUrl(),
+//                'existing_files' => $this->getExistingFiles(),
                 'extensions' => $this->getAllowedFileExtensions(),
             ]
         )));
@@ -134,6 +144,12 @@ class FileListButtonHook
             ],
             UriBuilder::ABSOLUTE_URL
         );
+    }
+
+    private function getExistingFiles()
+    {
+        $folderId = isset($_GET['id']) ? $_GET['id'] : $this->getRootLevelFolder();
+        return (new FileUpdater($this->resourceFactory->getFolderObjectFromCombinedIdentifier($folderId)))->getFilesMap();
     }
 
     /**

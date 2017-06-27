@@ -40,6 +40,11 @@ class FileUpdater
      */
     private $files = [];
 
+    /**
+     * @var array
+     */
+    private $filesMap = [];
+
     public function __construct(Folder $targetFolder)
     {
         $this->targetFolder = $targetFolder;
@@ -59,6 +64,11 @@ class FileUpdater
     public function getFiles()
     {
         return $this->files;
+    }
+
+    public function getFilesMap()
+    {
+        return $this->filesMap;
     }
 
     public function addOrUpdateFile(array $fileData)
@@ -89,6 +99,7 @@ class FileUpdater
         foreach ($this->targetFolder->getFiles() as $file) {
             if ($easydbUid = $file->getProperty('easydb_uid')) {
                 $this->files[$easydbUid] = $file;
+                $this->filesMap[$easydbUid] = $easydbUid;
             }
         }
     }
