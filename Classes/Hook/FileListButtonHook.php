@@ -183,12 +183,16 @@ class FileListButtonHook
     }
 
     /**
-     * TODO: FIXME We need to look up the root level folder like file list module does
-     *
      * @return string
      */
     private function getRootLevelFolder()
     {
-        return '1:/';
+        // Take the first object of the first storage
+        $fileStorages = $this->backendUserAuthentication->getFileStorages();
+        $fileStorage = current($fileStorages);
+        if ($fileStorage) {
+            return $fileStorage->getUid() . ':' . $fileStorage->getRootLevelFolder()->getIdentifier();
+        }
+        throw new \RuntimeException('Could not find any folder to be displayed.', 1498569603);
     }
 }
