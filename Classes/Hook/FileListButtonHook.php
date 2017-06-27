@@ -25,6 +25,7 @@ use Easydb\Typo3Integration\ExtensionConfig;
 use Easydb\Typo3Integration\Resource\FileUpdater;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Page\PageRenderer;
@@ -67,13 +68,19 @@ class FileListButtonHook
      */
     private $resourceFactory;
 
+    /**
+     * @var BackendUserAuthentication
+     */
+    private $backendUserAuthentication;
+
     public function __construct(
         ExtensionConfig $config = null,
         IconFactory $iconFactory = null,
         LanguageService $languageService = null,
         UriBuilder $uriBuilder = null,
         PageRenderer $pageRenderer = null,
-        ResourceFactory $resourceFactory = null
+        ResourceFactory $resourceFactory = null,
+        BackendUserAuthentication $backendUserAuthentication = null
     ) {
         $this->config = $config ?: new ExtensionConfig();
         $this->iconFactory = $iconFactory ?: GeneralUtility::makeInstance(IconFactory::class);
@@ -81,6 +88,7 @@ class FileListButtonHook
         $this->uriBuilder = $uriBuilder ?: GeneralUtility::makeInstance(UriBuilder::class);
         $this->pageRenderer = $pageRenderer ?: GeneralUtility::makeInstance(PageRenderer::class);
         $this->resourceFactory = $resourceFactory ?: GeneralUtility::makeInstance(ResourceFactory::class);
+        $this->backendUserAuthentication = $backendUserAuthentication ?: $GLOBALS['BE_USER'];
     }
 
     public function getButtons(array $params, ButtonBar $buttonBar)
@@ -163,16 +171,15 @@ class FileListButtonHook
     }
 
     /**
-     * TODO: make window size configurable
-     *
      * @return array
      */
     private function getWindowSize()
     {
-        return [
-            'width' => 650,
-            'height' => 600,
-        ];
+        if (empty($this->backendUserAuthentication->uc['easydb'])) {
+            $this->backendUserAuthentication->uc['easydb'] = $GLOBALS['TYPO3_CONF_VARS']['BE']['defaultUC']['easydb'];
+            $this->backendUserAuthentication->writeUC();
+        }
+        return $this->backendUserAuthentication->uc['easydb']['windowSize'];
     }
 
     /**

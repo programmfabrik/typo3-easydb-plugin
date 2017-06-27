@@ -25,6 +25,7 @@ use Easydb\Typo3Integration\EasydbRequest;
 use Easydb\Typo3Integration\Resource\FileUpdater;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
@@ -47,10 +48,16 @@ class ImportFilesController
      */
     private $messageQueue;
 
-    public function __construct(ResourceFactory $resourceFactory = null, FlashMessageQueue $messageQueue = null)
+    /**
+     * @var BackendUserAuthentication
+     */
+    private $backendUserAuthentication;
+
+    public function __construct(ResourceFactory $resourceFactory = null, FlashMessageQueue $messageQueue = null, BackendUserAuthentication $backendUserAuthentication = null)
     {
         $this->resourceFactory = $resourceFactory ?: GeneralUtility::makeInstance(ResourceFactory::class);
         $this->messageQueue = $messageQueue ?: GeneralUtility::makeInstance(FlashMessageService::class)->getMessageQueueByIdentifier();
+        $this->backendUserAuthentication = $backendUserAuthentication ?: $GLOBALS['BE_USER'];
     }
 
     public function importAction(ServerRequestInterface $request, ResponseInterface $response)
@@ -59,6 +66,10 @@ class ImportFilesController
         $easydbRequest = EasydbRequest::fromServerRequest($request);
 
         $addedFiles = [];
+
+        $this->backendUserAuthentication->uc['easydb']['windowSize'] = $easydbRequest->getWindowSize();
+        $this->backendUserAuthentication->writeUC();
+
         foreach ($easydbRequest->getFiles() as $fileData) {
             $action = 'insert';
             if ($fileUpdater->hasFile($fileData['uid'])) {
