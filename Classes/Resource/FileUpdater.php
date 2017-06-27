@@ -61,17 +61,17 @@ class FileUpdater
         return $this->files;
     }
 
-    public function addOrUpdateFile($localFilePath, array $fileData)
+    public function addOrUpdateFile(array $fileData)
     {
         $action = 'insert';
         if ($this->hasFile($fileData['uid'])) {
             $action = 'update';
             $existingFile = $this->getFile($fileData['uid']);
-            $existingFile->getStorage()->replaceFile($existingFile, $localFilePath);
+            $existingFile->getStorage()->replaceFile($existingFile, $fileData['local_file']);
             $existingFile->rename($fileData['filename']);
             $uploadedFile = $existingFile;
         } else {
-            $uploadedFile = $this->targetFolder->addFile($localFilePath, $fileData['filename'], DuplicationBehavior::RENAME);
+            $uploadedFile = $this->targetFolder->addFile($fileData['local_file'], $fileData['filename'], DuplicationBehavior::RENAME);
         }
         $this->addOrUpdateEasydbUid($uploadedFile, $fileData);
 

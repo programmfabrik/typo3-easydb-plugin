@@ -21,10 +21,10 @@ namespace Easydb\Typo3Integration\Controller;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Easydb\Typo3Integration\EasydbRequest;
 use Easydb\Typo3Integration\Resource\FileUpdater;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Core\Http\UploadedFile;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
@@ -56,34 +56,15 @@ class ImportFilesController
     public function importAction(ServerRequestInterface $request, ResponseInterface $response)
     {
         $fileUpdater = new FileUpdater($this->resourceFactory->getFolderObjectFromCombinedIdentifier($request->getQueryParams()['id']));
-        $easyDBRequest = \json_decode($request->getParsedBody()['body'], true);
-        $easydbUploadedFiles = $request->getUploadedFiles() ? $request->getUploadedFiles()['files'] : [];
+        $easydbRequest = EasydbRequest::fromServerRequest($request);
 
         $addedFiles = [];
-        foreach ($easyDBRequest['files'] as $fileData) {
-            $tempFileName = GeneralUtility::tempnam('easydb_');
-            if (empty($easydbUploadedFiles)) {
-                $fileContent = GeneralUtility::getUrl($fileData['url']);
-            } else {
-                /** @var UploadedFile $easydbUploadedFile */
-                foreach ($easydbUploadedFiles as $easydbUploadedFile) {
-                    if ($easydbUploadedFile->getClientFilename() !== $fileData['filename']) {
-                        continue;
-                    }
-                    $fileContent = $easydbUploadedFile->getStream();
-                }
-            }
-            if (!isset($fileContent)) {
-                throw new \RuntimeException('Invalid data sent for file ' . $fileData['filename'], 1498474983);
-            }
-            file_put_contents($tempFileName, $fileContent);
-            unset($fileContent);
-
+        foreach ($easydbRequest->getFiles() as $fileData) {
             $action = 'insert';
             if ($fileUpdater->hasFile($fileData['uid'])) {
                 $action = 'update';
             }
-            $addedFiles[] = $fileUpdater->addOrUpdateFile($tempFileName, $fileData);
+            $addedFiles[] = $fileUpdater->addOrUpdateFile($fileData);
             $this->addFlashMessage($action . 'File', [$fileData['filename']]);
         }
 
