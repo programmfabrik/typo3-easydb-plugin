@@ -26,6 +26,7 @@ use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Lang\LanguageService;
 
@@ -54,12 +55,23 @@ class FileListButtonHook
      */
     private $uriBuilder;
 
-    public function __construct(ExtensionConfig $config = null, IconFactory $iconFactory = null, LanguageService $languageService = null, UriBuilder $uriBuilder = null)
-    {
+    /**
+     * @var PageRenderer
+     */
+    private $pageRenderer;
+
+    public function __construct(
+        ExtensionConfig $config = null,
+        IconFactory $iconFactory = null,
+        LanguageService $languageService = null,
+        UriBuilder $uriBuilder = null,
+        PageRenderer $pageRenderer = null
+    ) {
         $this->config = $config ?: new ExtensionConfig();
         $this->iconFactory = $iconFactory ?: GeneralUtility::makeInstance(IconFactory::class);
         $this->languageService = $languageService ?: $GLOBALS['LANG'];
         $this->uriBuilder = $uriBuilder ?: GeneralUtility::makeInstance(UriBuilder::class);
+        $this->pageRenderer = $pageRenderer ?: GeneralUtility::makeInstance(PageRenderer::class);
     }
 
     public function getButtons(array $params, ButtonBar $buttonBar)
@@ -71,6 +83,7 @@ class FileListButtonHook
         if (!isset($_GET['M']) || 'file_FilelistList' !== $_GET['M']) {
             return $buttons;
         }
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Easydb/EasydbAdapter');
         $buttons[ButtonBar::BUTTON_POSITION_LEFT][] = [];
         $buttonBarIndex = count($buttons[ButtonBar::BUTTON_POSITION_LEFT]);
 
@@ -78,30 +91,34 @@ class FileListButtonHook
         $button->setShowLabelText(true);
         $button->setIcon($this->iconFactory->getIcon('actions-document-new', Icon::SIZE_SMALL));
         $button->setTitle($this->languageService->sL('LLL:EXT:easydb/Resources/Private/Language/locallang.xlf:addFiles'));
-        $button->setHref($this->getWindowOpenJs());
+        $button->setClasses('button__file-list-easydb');
+        $button->setDataAttributes(
+            [
+                'arguments' => \json_encode(
+                    [
+                        'targetUrl' => $this->getTargetUrl(),
+                        'window' => $this->getWindowSize(),
+                    ]
+                ),
+            ]
+        );
 
         $buttons[ButtonBar::BUTTON_POSITION_LEFT][$buttonBarIndex][] = $button;
 
         return $buttons;
     }
 
-    private function getWindowOpenJs()
+    private function getTargetUrl()
     {
         // Encoding galore
+        $serverUrl = rtrim($this->config->get('serverUrl'), '/');
         $filePickerArgument = \rawurlencode(\base64_encode(\json_encode(
             [
                 'callbackurl' => $this->getCallBackUrl(),
                 'extensions' => $this->getAllowedFileExtensions(),
             ]
         )));
-        $windowSize = $this->getWindowSize();
-        $serverUrl = rtrim($this->config->get('serverUrl'), '/');
-        return <<<EOF
-javascript:window.open("${serverUrl}?typo3filepicker=${filePickerArgument}",
-    "easydb_picker",
-    "width=${windowSize['width']},height=${windowSize['height']},status=0,menubar=0,resizable=1,location=0,directories=0,scrollbars=1,toolbar=0"
-);
-EOF;
+        return $serverUrl . '?typo3filepicker=' . $filePickerArgument;
     }
 
     /**
