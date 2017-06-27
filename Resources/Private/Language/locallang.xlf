@@ -3,11 +3,23 @@
 	<file t3:id="1498037912" source-language="en" datatype="plaintext" original="messages" date="2017-06-17T20:22:32Z" product-name="easydb">
 		<header/>
 		<body>
-			<trans-unit id="addFiles">
+			<trans-unit id="button.addFiles">
 				<source>Add files from easydb</source>
 			</trans-unit>
 			<trans-unit id="config.easydbServerUrl">
 				<source>URL to your easydb server</source>
+			</trans-unit>
+			<trans-unit id="action.insertFile">
+				<source>Added file "%1$s" from easydb</source>
+			</trans-unit>
+			<trans-unit id="action.insertFile.title">
+				<source>Added file</source>
+			</trans-unit>
+			<trans-unit id="action.updateFile">
+				<source>Updated file "%1$s" from easydb</source>
+			</trans-unit>
+			<trans-unit id="action.updateFile.title">
+				<source>Updated file</source>
 			</trans-unit>
 		</body>
 	</file>

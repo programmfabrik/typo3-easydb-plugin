@@ -90,7 +90,7 @@ class FileListButtonHook
         $button = $buttonBar->makeLinkButton();
         $button->setShowLabelText(true);
         $button->setIcon($this->iconFactory->getIcon('actions-document-new', Icon::SIZE_SMALL));
-        $button->setTitle($this->languageService->sL('LLL:EXT:easydb/Resources/Private/Language/locallang.xlf:addFiles'));
+        $button->setTitle($this->languageService->sL('LLL:EXT:easydb/Resources/Private/Language/locallang.xlf:button.addFiles'));
         $button->setClasses('button__file-list-easydb');
         $button->setDataAttributes(
             [

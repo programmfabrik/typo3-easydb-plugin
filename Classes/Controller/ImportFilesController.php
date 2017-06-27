@@ -26,6 +26,9 @@ use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Database\RelationHandler;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Http\UploadedFile;
+use TYPO3\CMS\Core\Messaging\FlashMessage;
+use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
+use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Resource\DuplicationBehavior;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
@@ -42,10 +45,15 @@ class ImportFilesController
      * @var ResourceFactory
      */
     private $resourceFactory;
+    /**
+     * @var FlashMessageQueue
+     */
+    private $messageQueue;
 
-    public function __construct(ResourceFactory $resourceFactory = null)
+    public function __construct(ResourceFactory $resourceFactory = null, FlashMessageQueue $messageQueue = null)
     {
         $this->resourceFactory = $resourceFactory ?: GeneralUtility::makeInstance(ResourceFactory::class);
+        $this->messageQueue = $messageQueue ?: GeneralUtility::makeInstance(FlashMessageService::class)->getMessageQueueByIdentifier();
     }
 
     public function importAction(ServerRequestInterface $request, ResponseInterface $response)
@@ -102,6 +110,8 @@ class ImportFilesController
                 'status' => 'done',
                 'action_taken' => $action,
             ];
+
+            $this->addFlashMessage($action . 'File', [$fileData['filename']]);
         }
 
         $easyDBResponse = [
@@ -143,5 +153,27 @@ class ImportFilesController
             []
         );
         $dataHandler->process_datamap();
+    }
+
+    private function addFlashMessage($message, array $arguments = [])
+    {
+        $languagePrefix = 'LLL:EXT:easydb/Resources/Private/Language/locallang.xlf:action.';
+        $languageTitleSuffix = '.title';
+        $this->messageQueue->addMessage(
+            new FlashMessage(
+                $this->translate($languagePrefix . $message, $arguments),
+                $this->translate($languagePrefix . $message . $languageTitleSuffix),
+                FlashMessage::OK,
+                true
+            )
+        );
+    }
+
+    private function translate($label, array $arguments = [])
+    {
+        if (empty($arguments)) {
+            return $GLOBALS['LANG']->sL($label);
+        }
+        return \vsprintf($GLOBALS['LANG']->sL($label), $arguments);
     }
 }
