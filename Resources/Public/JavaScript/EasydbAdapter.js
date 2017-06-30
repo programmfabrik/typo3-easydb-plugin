@@ -7,11 +7,6 @@ define(['jquery'], function($) {
 	var easydbAdapter = {
 
 		/**
-		 * Reference to the file picker window
-		 */
-		filePicker: null,
-
-		/**
 		 * Value map of events already handled
 		 */
 		eventsHandled: {},
@@ -20,7 +15,7 @@ define(['jquery'], function($) {
 			event.preventDefault();
 			var $arguments = $(event.target).data('arguments');
 			easydbAdapter.eventsHandled = {};
-			easydbAdapter.filePicker = top.window.open(
+			window.top.EasydbData.filePicker = window.top.open(
 				$arguments['targetUrl'],
 				'easydb_picker',
 				'width=' + $arguments['window']['width'] + ',height=' + $arguments['window']['height'] + ',status=0,menubar=0,resizable=1,location=0,directories=0,scrollbars=1,toolbar=0'
@@ -31,8 +26,9 @@ define(['jquery'], function($) {
 		 * Close the easydb file picker if we have a reference to it
 		 */
 		closePicker: function() {
-			if (easydbAdapter.filePicker) {
-				easydbAdapter.filePicker.close();
+			if (window.top.EasydbData.filePicker) {
+				window.top.EasydbData.filePicker.close();
+				window.top.EasydbData.filePicker = null;
 			}
 		},
 
@@ -53,12 +49,22 @@ define(['jquery'], function($) {
 		 * Add event listeners
 		 */
 		addEventListeners: function () {
-			top.window.addEventListener('message', this.reloadWindow);
+			if (!window.top.EasydbData.messageListener) {
+				window.top.window.addEventListener('message', this.reloadWindow);
+				window.top.EasydbData.messageListener = true;
+			}
 			$(function() {
 				$('.button__file-list-easydb').on('click', easydbAdapter.openPicker);
 			});
 		}
 	};
+
+	if (!window.top.EasydbData) {
+		window.top.EasydbData = {
+			messageListener: null,
+			filePicker: null
+		};
+	}
 
 	easydbAdapter.addEventListeners();
 
