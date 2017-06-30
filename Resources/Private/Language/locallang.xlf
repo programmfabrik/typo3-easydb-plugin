@@ -9,6 +9,9 @@
 			<trans-unit id="config.easydbServerUrl">
 				<source>URL to your easydb server</source>
 			</trans-unit>
+			<trans-unit id="config.allowedFileExtensions">
+				<source>File extensions that shall be imported from easydb</source>
+			</trans-unit>
 			<trans-unit id="action.insertFile">
 				<source>Added file "%1$s" from easydb</source>
 			</trans-unit>

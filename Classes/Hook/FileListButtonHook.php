@@ -173,13 +173,11 @@ class FileListButtonHook
     }
 
     /**
-     * TODO: take allowed file extensions from user permissions
-     *
      * @return array
      */
     private function getAllowedFileExtensions()
     {
-        return ['jpg', 'tif', 'png'];
+        return GeneralUtility::trimExplode(',', $this->config->get('allowedFileExtensions'));
     }
 
     /**
