@@ -32,7 +32,7 @@ define(['jquery'], function($) {
 			}
 		},
 
-		reloadWindow: function(event) {
+		handleMessageEvent: function(event) {
 			if (event.data['easydb']) {
 				if (event.data['easydb']['action'] === 'reload' && !easydbAdapter.eventsHandled[event.data['easydb']['action']]) {
 					window.location.reload();
@@ -50,7 +50,7 @@ define(['jquery'], function($) {
 		 */
 		addEventListeners: function () {
 			if (!window.top.EasydbData.messageListener) {
-				window.top.window.addEventListener('message', this.reloadWindow);
+				window.top.window.addEventListener('message', this.handleMessageEvent);
 				window.top.EasydbData.messageListener = true;
 			}
 			$(function() {
