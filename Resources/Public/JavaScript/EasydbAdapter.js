@@ -40,12 +40,10 @@ define(['jquery'], function($) {
 			if (event.data['easydb']) {
 				if (event.data['easydb']['action'] === 'reload' && !easydbAdapter.eventsHandled[event.data['easydb']['action']]) {
 					window.location.reload();
-					easydbAdapter.closePicker();
 					easydbAdapter.eventsHandled['reload'] = true;
-					easydbAdapter.eventsHandled['close'] = true;
 				}
 				if (event.data['easydb']['action'] === 'close' && !easydbAdapter.eventsHandled[event.data['easydb']['action']]) {
-					window.location.reload();
+					easydbAdapter.closePicker();
 					easydbAdapter.eventsHandled['close'] = true;
 				}
 			}
@@ -56,8 +54,6 @@ define(['jquery'], function($) {
 		 */
 		addEventListeners: function () {
 			top.window.addEventListener('message', this.reloadWindow);
-			top.window.addEventListener('beforeunload', this.closePicker);
-			window.addEventListener('beforeunload', this.closePicker);
 			$(function() {
 				$('.button__file-list-easydb').on('click', easydbAdapter.openPicker);
 			});
