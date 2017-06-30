@@ -71,13 +71,23 @@ class ImportFilesController
         $this->backendUserAuthentication->writeUC();
 
         foreach ($easydbRequest->getFiles() as $fileData) {
-            $action = 'insert';
-            if ($fileUpdater->hasFile($fileData['uid'])) {
-                $action = 'update';
+            try {
+                $action = 'insert';
+                if ($fileUpdater->hasFile($fileData['uid'])) {
+                    $action = 'update';
+                }
+                $addedFiles[] = $fileUpdater->addOrUpdateFile($fileData);
+                $this->addFlashMessage($action . 'File', [$fileData['filename']]);
+            } catch (\Exception $e) {
+                $addedFiles[] = [
+                    'uid' => $fileData['uid'],
+                    'status' => 'error',
+                    'error' => [
+                        'code' => 'error.typo3.file_import',
+                        'description' => $e->getMessage(),
+                    ],
+                ];
             }
-            // TODO: Handle error case
-            $addedFiles[] = $fileUpdater->addOrUpdateFile($fileData);
-            $this->addFlashMessage($action . 'File', [$fileData['filename']]);
         }
 
         $easyDBResponse = [
