@@ -141,8 +141,7 @@ class FileListButtonHook
         $filePickerArgument = \rawurlencode(\base64_encode(\json_encode(
             [
                 'callbackurl' => $this->getCallBackUrl(),
-// TODO: Check why this is not working (easydb side)
-//                'existing_files' => $this->getExistingFiles(),
+                'existing_files' => $this->getExistingFiles(),
                 'extensions' => $this->getAllowedFileExtensions(),
             ]
         )));
