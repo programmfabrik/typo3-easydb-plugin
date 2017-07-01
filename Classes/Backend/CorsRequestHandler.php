@@ -156,7 +156,6 @@ class CorsRequestHandler implements RequestHandlerInterface
      */
     private function getAllowedOriginHeaders($origin)
     {
-        // TODO: check if we need to allow more headers or distinguish between origins
         return $this->allowedHeaders;
     }
 }
