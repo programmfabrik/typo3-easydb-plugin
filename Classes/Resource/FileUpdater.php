@@ -1,6 +1,7 @@
 <?php
 namespace Easydb\Typo3Integration\Resource;
 
+use TYPO3\CMS\Backend\Configuration\TranslationConfigurationProvider;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\RelationHandler;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
@@ -37,6 +38,21 @@ class FileUpdater
     private $targetFolder;
 
     /**
+     * @var DataHandler
+     */
+    private $dataHandler;
+
+    /**
+     * @var RelationHandler
+     */
+    private $relationHandler;
+
+    /**
+     * @var TranslationConfigurationProvider
+     */
+    private $translationConfigurationProvider;
+
+    /**
      * @var File[]
      */
     private $files = [];
@@ -46,10 +62,17 @@ class FileUpdater
      */
     private $filesMap = [];
 
-    public function __construct(Folder $targetFolder)
-    {
+    public function __construct(
+        Folder $targetFolder,
+        DataHandler $dataHandler = null,
+        RelationHandler $relationHandler = null,
+        TranslationConfigurationProvider $translationConfigurationProvider = null
+    ) {
         $this->targetFolder = $targetFolder;
         $this->fetchFiles();
+        $this->dataHandler = $dataHandler ?: GeneralUtility::makeInstance(DataHandler::class);
+        $this->relationHandler = $relationHandler ?: GeneralUtility::makeInstance(RelationHandler::class);
+        $this->translationConfigurationProvider = $translationConfigurationProvider ?: GeneralUtility::makeInstance(TranslationConfigurationProvider::class);
     }
 
     public function hasFile($uid)
@@ -84,7 +107,7 @@ class FileUpdater
         } else {
             $uploadedFile = $this->targetFolder->addFile($fileData['local_file'], $fileData['filename'], DuplicationBehavior::RENAME);
         }
-        $this->addOrUpdateEasydbUid($uploadedFile, $fileData);
+        $this->addOrUpdateMetaData($uploadedFile, $fileData);
 
         return [
             'uid' => $fileData['uid'],
@@ -105,10 +128,75 @@ class FileUpdater
         }
     }
 
-    private function addOrUpdateEasydbUid(File $file, array $fileData)
+    private function addOrUpdateMetaData(File $file, array $fileData)
     {
-        $relationHandler = GeneralUtility::makeInstance(RelationHandler::class);
-        $relationHandler->start(
+        $this->dataHandler->start(
+            [
+                'sys_file' => [
+                    $file->getUid() => [
+                        'easydb_uid' => $fileData['uid'],
+                    ],
+                ],
+                'sys_file_metadata' => $this->mapEsaydbMetaDataToMetaDataRecords($file, $fileData),
+            ],
+            []
+        );
+        $this->dataHandler->process_datamap();
+    }
+
+    private function mapEsaydbMetaDataToMetaDataRecords(File $file, array $fileData)
+    {
+        $existingMetaDataRecords = $this->getExistingMetaDataRecords($file);
+        $metaDataUpdates = [];
+        $systemLanguages = $this->getSystemLanguages();
+        // Only handle meta data fields currently present in TYPO3
+        $existingMetaDataFields = array_intersect_key($fileData, $existingMetaDataRecords[0]);
+
+        // Unset special easydb fields
+        unset($existingMetaDataFields['uid'], $existingMetaDataFields['url'], $existingMetaDataFields['filename']);
+
+        foreach ($existingMetaDataFields as $fieldName => $metaDataValue) {
+            $metaRecordUid = $existingMetaDataRecords[0]['uid'];
+            $fieldValue = $metaDataValue;
+            if (is_array($metaDataValue)) {
+                foreach ($metaDataValue as $locale => $easydbValue) {
+                    $isoCode = preg_replace('/\-[A-Z]{2}$/', '', $locale);
+                    if (isset($systemLanguages[$isoCode])) {
+                        $languageUid = $systemLanguages[$isoCode]['uid'];
+                        if (!isset($existingMetaDataRecords[$languageUid])) {
+                            $this->dataHandler->start([], []);
+                            $metaRecordUid = $this->dataHandler->localize('sys_file_metadata', $existingMetaDataRecords[0]['uid'], $languageUid);
+                            $existingMetaDataRecords[$languageUid]['uid'] = $metaRecordUid;
+                        }
+                    }
+                    $fieldValue = $easydbValue;
+                }
+            }
+            $metaDataUpdates[$metaRecordUid][$fieldName] = $fieldValue;
+        }
+
+        return $metaDataUpdates;
+    }
+
+    private function getSystemLanguages()
+    {
+        // first two keys are "0" (default) and "-1" (multiple), after that comes the "other languages"
+        $systemLanguages = $this->translationConfigurationProvider->getSystemLanguages();
+        $languagesByIsoCode = [];
+        foreach ($systemLanguages as $systemLanguage) {
+            if ((int)$systemLanguage['uid'] === 0) {
+                $isoCode = str_replace('flag-', '', $systemLanguage['flagIcon']);
+            } else {
+                $isoCode = isset($systemLanguage['language_isocode']) ? $systemLanguage['language_isocode'] : $systemLanguage['ISOcode'];
+            }
+            $languagesByIsoCode[$isoCode] = $systemLanguage;
+        }
+        return $languagesByIsoCode;
+    }
+
+    private function getExistingMetaDataRecords(File $file)
+    {
+        $this->relationHandler->start(
             $file->getUid(),
             'sys_file_metadata',
             '',
@@ -116,36 +204,11 @@ class FileUpdater
             'sys_file',
             $GLOBALS['TCA']['sys_file']['columns']['metadata']['config']
         );
-        $metaDataRecords = $relationHandler->getValueArray();
-        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
-        $dataHandler->start(
-            [
-                'sys_file' => [
-                    $file->getUid() => [
-                        'easydb_uid' => $fileData['uid'],
-                    ],
-                ],
-                'sys_file_metadata' => [
-                    // TODO handle meta data translations
-                    $this->getDefaultLanguageMetaDataRecord($metaDataRecords) => [
-                        // TODO: add further meta data properties once provided
-                        'title' => $fileData['title'],
-                    ],
-                ],
-            ],
-            []
-        );
-        $dataHandler->process_datamap();
-    }
-
-    private function getDefaultLanguageMetaDataRecord(array $metaDataUids)
-    {
-        foreach ($metaDataUids as $metaDataUid) {
+        $existingMetaDataRecords = [];
+        foreach ($this->relationHandler->getValueArray() as $metaDataUid) {
             $row = BackendUtility::getRecord('sys_file_metadata', $metaDataUid);
-            if ((string)$row['sys_language_uid'] === '0') {
-                return $metaDataUid;
-            }
+            $existingMetaDataRecords[$row['sys_language_uid']] = $row;
         }
-        return current($metaDataUids);
+        return $existingMetaDataRecords;
     }
 }
