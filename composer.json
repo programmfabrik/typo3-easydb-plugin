@@ -2,7 +2,7 @@
     "name": "easydb/typo3-integration",
     "type": "typo3-cms-extension",
     "description" : "Integration of easydb asset management in TYPO3 CMS",
-    "license": "GPL-2.0+",
+    "license": "LGPL-3.0",
     "authors": [
         {
             "name": "Helmut Hummel",
