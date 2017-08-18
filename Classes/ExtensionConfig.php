@@ -30,9 +30,9 @@ class ExtensionConfig
      */
     private $config;
 
-    public function __construct($serializedConfig = null)
+    public function __construct(array $config = null)
     {
-        $this->config = $serializedConfig ? unserialize($serializedConfig) : unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][self::$extensionKey]);
+        $this->config = $config ?: unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][self::$extensionKey]);
         $this->setDerivedConfigOptions();
     }
 
