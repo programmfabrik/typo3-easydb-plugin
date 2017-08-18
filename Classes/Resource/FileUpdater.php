@@ -1,8 +1,11 @@
 <?php
-namespace Easydb\Typo3Integration\Resource;
+namespace Easydb\Typo3Integration\Persistence;
 
+use Easydb\Typo3Integration\ExtensionConfig;
 use TYPO3\CMS\Backend\Configuration\TranslationConfigurationProvider;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\DatabaseConnection;
 use TYPO3\CMS\Core\Database\RelationHandler;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Resource\DuplicationBehavior;
@@ -48,11 +51,6 @@ class FileUpdater
     private $relationHandler;
 
     /**
-     * @var TranslationConfigurationProvider
-     */
-    private $translationConfigurationProvider;
-
-    /**
      * @var File[]
      */
     private $files = [];
@@ -72,7 +70,6 @@ class FileUpdater
         $this->fetchFiles();
         $this->dataHandler = $dataHandler ?: GeneralUtility::makeInstance(DataHandler::class);
         $this->relationHandler = $relationHandler ?: GeneralUtility::makeInstance(RelationHandler::class);
-        $this->translationConfigurationProvider = $translationConfigurationProvider ?: GeneralUtility::makeInstance(TranslationConfigurationProvider::class);
     }
 
     public function hasFile($uid)
@@ -130,6 +127,11 @@ class FileUpdater
 
     private function addOrUpdateMetaData(File $file, array $fileData)
     {
+        $metaDataProcessor = new MetaDataProcessor(
+            $this->getExistingMetaDataRecords($file),
+            $this->dataHandler,
+            new SystemLanguages(new ExtensionConfig())
+        );
         $this->dataHandler->start(
             [
                 'sys_file' => [
@@ -137,61 +139,11 @@ class FileUpdater
                         'easydb_uid' => $fileData['uid'],
                     ],
                 ],
-                'sys_file_metadata' => $this->mapEsaydbMetaDataToMetaDataRecords($file, $fileData),
+                'sys_file_metadata' => $metaDataProcessor->mapEsaydbMetaDataToMetaDataRecords($fileData),
             ],
             []
         );
         $this->dataHandler->process_datamap();
-    }
-
-    private function mapEsaydbMetaDataToMetaDataRecords(File $file, array $fileData)
-    {
-        $existingMetaDataRecords = $this->getExistingMetaDataRecords($file);
-        $metaDataUpdates = [];
-        $systemLanguages = $this->getSystemLanguages();
-        // Only handle meta data fields currently present in TYPO3
-        $existingMetaDataFields = array_intersect_key($fileData, $existingMetaDataRecords[0]);
-
-        // Unset special easydb fields
-        unset($existingMetaDataFields['uid'], $existingMetaDataFields['url'], $existingMetaDataFields['filename']);
-
-        foreach ($existingMetaDataFields as $fieldName => $metaDataValue) {
-            $metaRecordUid = $existingMetaDataRecords[0]['uid'];
-            $fieldValue = $metaDataValue;
-            if (is_array($metaDataValue)) {
-                foreach ($metaDataValue as $locale => $easydbValue) {
-                    $isoCode = preg_replace('/\-[A-Z]{2}$/', '', $locale);
-                    if (isset($systemLanguages[$isoCode])) {
-                        $languageUid = $systemLanguages[$isoCode]['uid'];
-                        if (!isset($existingMetaDataRecords[$languageUid])) {
-                            $this->dataHandler->start([], []);
-                            $metaRecordUid = $this->dataHandler->localize('sys_file_metadata', $existingMetaDataRecords[0]['uid'], $languageUid);
-                            $existingMetaDataRecords[$languageUid]['uid'] = $metaRecordUid;
-                        }
-                    }
-                    $fieldValue = $easydbValue;
-                }
-            }
-            $metaDataUpdates[$metaRecordUid][$fieldName] = $fieldValue;
-        }
-
-        return $metaDataUpdates;
-    }
-
-    private function getSystemLanguages()
-    {
-        // first two keys are "0" (default) and "-1" (multiple), after that comes the "other languages"
-        $systemLanguages = $this->translationConfigurationProvider->getSystemLanguages();
-        $languagesByIsoCode = [];
-        foreach ($systemLanguages as $systemLanguage) {
-            if ((int)$systemLanguage['uid'] === 0) {
-                $isoCode = str_replace('flag-', '', $systemLanguage['flagIcon']);
-            } else {
-                $isoCode = isset($systemLanguage['language_isocode']) ? $systemLanguage['language_isocode'] : $systemLanguage['ISOcode'];
-            }
-            $languagesByIsoCode[$isoCode] = $systemLanguage;
-        }
-        return $languagesByIsoCode;
     }
 
     private function getExistingMetaDataRecords(File $file)
