@@ -12,6 +12,9 @@
 			<trans-unit id="config.allowedFileExtensions">
 				<source>File extensions that shall be imported from easydb</source>
 			</trans-unit>
+			<trans-unit id="config.defaultLocale">
+				<source>easydb locale for the TYPO3 default language</source>
+			</trans-unit>
 			<trans-unit id="action.insertFile">
 				<source>Added file "%1$s" from easydb</source>
 			</trans-unit>
@@ -23,6 +26,9 @@
 			</trans-unit>
 			<trans-unit id="action.updateFile.title">
 				<source>Updated file</source>
+			</trans-unit>
+			<trans-unit id="label.language.locale">
+				<source>easydb locale:</source>
 			</trans-unit>
 		</body>
 	</file>

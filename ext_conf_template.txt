@@ -2,3 +2,5 @@
 serverUrl =
 # cat=Login; type=string; label=LLL:EXT:easydb/Resources/Private/Language/locallang.xlf:config.allowedFileExtensions
 allowedFileExtensions = jpg,tif,png
+# cat=Login; type=string; label=LLL:EXT:easydb/Resources/Private/Language/locallang.xlf:config.defaultLocale
+defaultLocale = en-US
