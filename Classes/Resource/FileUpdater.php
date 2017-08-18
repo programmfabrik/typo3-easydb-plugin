@@ -1,5 +1,5 @@
 <?php
-namespace Easydb\Typo3Integration\Persistence;
+namespace Easydb\Typo3Integration\Resource;
 
 use Easydb\Typo3Integration\ExtensionConfig;
 use TYPO3\CMS\Backend\Configuration\TranslationConfigurationProvider;
