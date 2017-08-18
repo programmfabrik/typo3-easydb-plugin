@@ -22,6 +22,7 @@ namespace Easydb\Typo3Integration\Tests\Unit\Backend;
  ***************************************************************/
 
 use Easydb\Typo3Integration\Backend\CorsRequestHandler;
+use Easydb\Typo3Integration\ExtensionConfig;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Http\ServerRequest;
 
@@ -32,7 +33,7 @@ class CorsRequestHandlerTest extends \PHPUnit_Framework_TestCase
      */
     public function cannotHandleRequestWhenNoOriginHeaderIsSet()
     {
-        $subject = new CorsRequestHandler();
+        $subject = new CorsRequestHandler(new ExtensionConfig(['serverUrl' => 'http://localhost']));
         $request = new ServerRequest();
         $this->assertFalse($subject->canHandleRequest($request));
     }
@@ -42,7 +43,7 @@ class CorsRequestHandlerTest extends \PHPUnit_Framework_TestCase
      */
     public function canHandleRequestWhenOriginHeaderIsSet()
     {
-        $subject = new CorsRequestHandler();
+        $subject = new CorsRequestHandler(new ExtensionConfig(['serverUrl' => 'http://localhost']));
         $request = new ServerRequest(
             null,
             null,
@@ -59,7 +60,7 @@ class CorsRequestHandlerTest extends \PHPUnit_Framework_TestCase
      */
     public function returnsUnmodifiedResponseWithInvalidRequest()
     {
-        $subject = new CorsRequestHandler();
+        $subject = new CorsRequestHandler(new ExtensionConfig(['serverUrl' => 'http://localhost']));
         $request = new ServerRequest();
         $response = new Response();
 
@@ -71,7 +72,7 @@ class CorsRequestHandlerTest extends \PHPUnit_Framework_TestCase
      */
     public function returnsUnmodifiedResponseWithInvalidOptionsRequest()
     {
-        $subject = new CorsRequestHandler();
+        $subject = new CorsRequestHandler(new ExtensionConfig(['serverUrl' => 'http://localhost']));
         $request = new ServerRequest(null, 'OPTIONS');
         $response = new Response();
 
@@ -83,7 +84,7 @@ class CorsRequestHandlerTest extends \PHPUnit_Framework_TestCase
      */
     public function returnsUnmodifiedResponseWithInvalidMethodRequest()
     {
-        $subject = new CorsRequestHandler();
+        $subject = new CorsRequestHandler(new ExtensionConfig(['serverUrl' => 'http://localhost']));
         $request = new ServerRequest(null, 'GET');
         $response = new Response();
 
@@ -95,7 +96,7 @@ class CorsRequestHandlerTest extends \PHPUnit_Framework_TestCase
      */
     public function returnsUnmodifiedResponseWithInvalidPostRequest()
     {
-        $subject = new CorsRequestHandler();
+        $subject = new CorsRequestHandler(new ExtensionConfig(['serverUrl' => 'http://localhost']));
         $request = new ServerRequest(null, 'POST');
         $response = new Response();
 
@@ -107,7 +108,7 @@ class CorsRequestHandlerTest extends \PHPUnit_Framework_TestCase
      */
     public function returnsResponseWithCorsHeadersWithValidOptionsRequest()
     {
-        $subject = new CorsRequestHandler();
+        $subject = new CorsRequestHandler(new ExtensionConfig(['serverUrl' => 'http://localhost']));
         $request = new ServerRequest(
             null,
             'OPTIONS',
@@ -129,7 +130,7 @@ class CorsRequestHandlerTest extends \PHPUnit_Framework_TestCase
      */
     public function returnsResponseWithCorsHeadersWithValidPostRequest()
     {
-        $subject = new CorsRequestHandler();
+        $subject = new CorsRequestHandler(new ExtensionConfig(['serverUrl' => 'http://localhost']));
         $request = new ServerRequest(
             null,
             'POST',
