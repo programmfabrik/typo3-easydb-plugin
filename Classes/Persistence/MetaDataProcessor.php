@@ -21,7 +21,6 @@ namespace Easydb\Typo3Integration\Persistence;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use Easydb\Typo3Integration\Persistence\SystemLanguages;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Utility\GeneralUtility;

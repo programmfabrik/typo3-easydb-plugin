@@ -21,8 +21,8 @@ namespace Easydb\Typo3Integration\Tests\Unit\Resource\MetaDataProcessor;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use Easydb\Typo3Integration\Persistence\SystemLanguages;
 use Easydb\Typo3Integration\Persistence\MetaDataProcessor;
+use Easydb\Typo3Integration\Persistence\SystemLanguages;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 
 class MetaDataProcessorTest extends \PHPUnit_Framework_TestCase
@@ -130,7 +130,8 @@ class MetaDataProcessorTest extends \PHPUnit_Framework_TestCase
      * @test
      * @dataProvider mapsMetaDataCorrectlyDataProvider
      */
-    public function mapsMetaDataCorrectly(array $locales, array $metaData, array $payload, array $expected) {
+    public function mapsMetaDataCorrectly(array $locales, array $metaData, array $payload, array $expected)
+    {
         $systemLanguagesProphecy = $this->prophesize(SystemLanguages::class);
         $systemLanguagesProphecy->getLocaleIdMapping()->willReturn($locales);
         $dataHandlerProphecy = $this->prophesize(DataHandler::class);
@@ -149,7 +150,8 @@ class MetaDataProcessorTest extends \PHPUnit_Framework_TestCase
      * @test
      * @dataProvider mapsMetaDataCorrectlyDataProvider
      */
-    public function createsNewMetaDataRecordWhenItDoesNotExist() {
+    public function createsNewMetaDataRecordWhenItDoesNotExist()
+    {
         $locales = [
             'en-US' => 0,
             'de-DE' => 1,
@@ -190,7 +192,7 @@ class MetaDataProcessorTest extends \PHPUnit_Framework_TestCase
                 'title' => [
                     'en-US' => 'A title',
                     'de-DE' => 'Ein Titel',
-                ]
+                ],
             ]
         );
 
