@@ -38,10 +38,20 @@ script:
     echo "Running unit tests";
     .Build/vendor/bin/phpunit -c .Build/vendor/nimut/testing-framework/res/Configuration/UnitTests.xml Tests/Unit/
 
+after_script:
   - >
-    echo;
-    export typo3DatabaseName="typo3";
-    export typo3DatabaseHost="localhost";
-    export typo3DatabaseUsername="root";
-    export typo3DatabasePassword="";
-    find 'Tests/Functional' -wholename '*Test.php' | parallel --gnu 'echo; echo "Running functional test suite {}"; .Build/bin/phpunit --colors  -c .Build/vendor/nimut/testing-framework/res/Configuration/FunctionalTests.xml {}'
+    if [ -n "$TRAVIS_TAG" ] && [ -n "$TYPO3_ORG_USERNAME" ] && [ -n "$TYPO3_ORG_PASSWORD" ]; then
+      echo -e "Preparing upload of release ${TRAVIS_TAG} to TER\n"
+      curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.4.4/lib/travis-after-all.js | node
+      if [ $? -eq 0 ]; then
+        # Cleanup before we upload
+        composer require --dev typo3/cms ^8.7 --update-with-dependencies
+        composer require --dev helhum/ter-client dev-master
+        git reset --hard HEAD && git clean -fx
+
+        # Upload
+        TAG_MESSAGE=`git tag -n10 -l $TRAVIS_TAG | sed 's/^[0-9.]*[ ]*//g'`
+        echo "Uploading release ${TRAVIS_TAG} to TER"
+        .Build/bin/ter-client upload typo3_console . -u "$TYPO3_ORG_USERNAME" -p "$TYPO3_ORG_PASSWORD" -m "$TAG_MESSAGE"
+      fi;
+    fi;
