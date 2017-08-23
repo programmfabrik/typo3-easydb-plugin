@@ -2,6 +2,8 @@
 namespace Easydb\Typo3Integration\Resource;
 
 use Easydb\Typo3Integration\ExtensionConfig;
+use Easydb\Typo3Integration\Persistence\MetaDataProcessor;
+use Easydb\Typo3Integration\Persistence\SystemLanguages;
 use TYPO3\CMS\Backend\Configuration\TranslationConfigurationProvider;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\RelationHandler;
