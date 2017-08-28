@@ -63,7 +63,17 @@ class ImportFilesController
     public function importAction(ServerRequestInterface $request, ResponseInterface $response)
     {
         $fileUpdater = new FileUpdater($this->resourceFactory->getFolderObjectFromCombinedIdentifier($request->getQueryParams()['id']));
-        $easydbRequest = EasydbRequest::fromServerRequest($request);
+        try {
+            $easydbRequest = EasydbRequest::fromServerRequest($request);
+        } catch (\Exception $e) {
+            return [
+                'status' => 'error',
+                'error' => [
+                    'code' => 'error.typo3.request',
+                    'description' => $e->getMessage(),
+                ],
+            ];
+        }
 
         $addedFiles = [];
 
@@ -71,6 +81,11 @@ class ImportFilesController
         $this->backendUserAuthentication->writeUC();
 
         foreach ($easydbRequest->getFiles() as $fileData) {
+            if (!empty($fileData['error'])) {
+                // Error occurred during building the request
+                $addedFiles[] = $fileData['error'];
+                continue;
+            }
             try {
                 $action = 'insert';
                 if ($fileUpdater->hasFile($fileData['uid'])) {

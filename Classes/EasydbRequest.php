@@ -65,12 +65,24 @@ class EasydbRequest
                 /** @var UploadedFile $uploadedFile */
                 foreach ($uploadedFiles as $uploadedFile) {
                     if ($uploadedFile->getClientFilename() !== $fileData['filename']) {
+                        $fileData['error'] = [
+                            'code' => 'error.typo3.file_import',
+                            'description' => sprintf('Filename inconsistent. Got "%s" and "%s", but both must be the same.', $fileData['filename'], $uploadedFile->getClientFilename()),
+                        ];
                         continue;
                     }
                     file_put_contents($localFilePath, $uploadedFile->getStream()->getContents());
                 }
             } else {
-                file_put_contents($localFilePath, GeneralUtility::getUrl($fileData['url']));
+                $fileContent = GeneralUtility::getUrl($fileData['url']);
+                if ($fileContent) {
+                    file_put_contents($localFilePath, $fileContent);
+                } else {
+                    $fileData['error'] = [
+                        'code' => 'error.typo3.file_import',
+                        'description' => sprintf('Could not retrieve file contents from URL "%s"', $fileData['url']),
+                    ];
+                }
             }
             $fileData['local_file'] = $localFilePath;
         }
