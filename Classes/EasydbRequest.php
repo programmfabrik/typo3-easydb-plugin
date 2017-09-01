@@ -66,7 +66,11 @@ class EasydbRequest
                 foreach ($uploadedFiles as $uploadedFile) {
                     if ($uploadedFile->getClientFilename() !== $fileData['filename']) {
                         $fileData['error'] = [
-                            'code' => 'error.typo3.file_import',
+                            'code' => 'error.typo3.filename_inconsistent',
+                            'parameters' => [
+                                'filenameData' => $fileData['filename'],
+                                'filenameRequest' => $uploadedFile->getClientFilename(),
+                            ],
                             'description' => sprintf('Filename inconsistent. Got "%s" and "%s", but both must be the same.', $fileData['filename'], $uploadedFile->getClientFilename()),
                         ];
                         continue;
@@ -79,7 +83,10 @@ class EasydbRequest
                     file_put_contents($localFilePath, $fileContent);
                 } else {
                     $fileData['error'] = [
-                        'code' => 'error.typo3.file_import',
+                        'code' => 'error.typo3.fetch_url_failed',
+                        'parameters' => [
+                            'url' => $fileData['url'],
+                        ],
                         'description' => sprintf('Could not retrieve file contents from URL "%s"', $fileData['url']),
                     ];
                 }

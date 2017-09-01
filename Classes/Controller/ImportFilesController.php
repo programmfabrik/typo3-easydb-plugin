@@ -83,7 +83,12 @@ class ImportFilesController
         foreach ($easydbRequest->getFiles() as $fileData) {
             if (!empty($fileData['error'])) {
                 // Error occurred during building the request
-                $addedFiles[] = $fileData['error'];
+                $addedFiles[] = [
+                    'uid' => $fileData['uid'],
+                    'status' => 'error',
+                    'error' => $fileData['error'],
+                    'action_taken' => 'insert',
+                ];
                 continue;
             }
             try {
@@ -101,6 +106,7 @@ class ImportFilesController
                         'code' => 'error.typo3.file_import',
                         'description' => $e->getMessage(),
                     ],
+                    'action_taken' => $action,
                 ];
             }
         }
