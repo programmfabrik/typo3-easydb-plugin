@@ -9,16 +9,18 @@
 What does it do?
 ================
 
-First of all, if you have any idea how this template can be improved, please, drop a note to our team_. Documentation is written in reST format. Please, refer to Help writing reStructuredText to get some insight regarding syntax and existing reST editors on the market.
+This extension allows users to import media files from easydb_ digital asset management system into a TYPO3 file storage.
+The to be imported files can be selected in a popup window, which shows the easydb file picker UI.
+When pressing the import button, these files are copied into the TYPO3 storage.
 
-.. _team: https://forge.typo3.org/projects/typo3v4-official_extension_template/issues
+When the same files are copied again, they are updated within TYPO3.
 
-Here should be given a brief overview of the extension. What does it do? What problem does it solve? Who is interested in this? Basically the document includes everything people need to know to decide, if they should go on with this extension.
+However when a file is deleted in easydb it will still remain within TYPO3 until is deleted there as well.
 
-.. figure:: ../Images/IntroductionPackage.png
+.. _easydb: https://www.programmfabrik.de/easydb/
+
+.. figure:: ../Images/FilePicker.png
 	:width: 500px
-	:alt: Introduction Package
+	:alt: easydb file picker
 
-	Introduction Package just after installation (caption of the image)
-
-	How the Frontend of the Introduction Package looks like just after installation (legend of the image)
+	Selecting a file from easydb for import into TYPO3

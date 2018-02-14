@@ -36,7 +36,7 @@ easydb TYPO3 integration
 		Helmut Hummel
 
 	:Email:
-		info@helhum.io
+		tickets@programmfabrik.de
 
 	:License:
 		This document is published under the Open Publication License

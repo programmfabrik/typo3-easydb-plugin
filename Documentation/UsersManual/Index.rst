@@ -11,39 +11,42 @@
 Users manual
 ============
 
-Documentation of how to use the extension, how it works, how to apply it, if it's a website plugin.
+As an editor, importing files from easydb is straightforward.
 
-Language should be non-technical, explaining, using small examples. Don't use to many acronyms unless they have been explained.
+The extension adds an additional button for adding files from easydb, which can be used as an alternative
+to uploading files from a local computer.
 
-Examples: For the "News" plugin this would be a manual showing how to create the news items, explaining the options etc.
+Navigate the the filelist module within TYPO3, select a folder within the storage where the easydb files
+should be imported into and press the "Add files from easydb" button.
 
-Provide screenshots of a neutral Backend such as the Backend of the Introduction Package for instance. Have in mind that the User manual could possibly be re-used in a larger documentation compilation, for example when a company generates a documentation for its client.
-
-Target group: **Users**
-
-.. figure:: ../Images/UserManual/BackendView.png
+.. figure:: ../Images/UserManual/AddFilesButton.png
 	:width: 500px
-	:alt: Backend view
+	:alt: Button to import files
 
-	Default Backend view (caption of the image)
+	Button to import files
 
-	The Backend view of TYPO3 after the user has clicked on module "Page". (legend of the image)
+A file picker appears in a popup window appears, presenting the easydb UI.
+You can use the search and filters to find the files you want to import.
+Select files you want to import and after that press the TYPO3 import button.
 
+.. figure:: ../Images/UserManual/FilePicker.png
+	:width: 500px
+	:alt: easydb file picker
 
-Link to official documentation
-------------------------------
+	easydb file picker
 
-Sphinx makes it easy to link to official TYPO3 documentation:
+After confirming the import, the selected files from easydb are imported into the TYPO3 file storage.
 
-- :ref:`TYPO3 Tutorial for Editors <t3editors:start>`
-- :ref:`Getting Started Tutorial <t3start:start>`
+.. figure:: ../Images/UserManual/FilePicker.png
+	:width: 500px
+	:alt: successful import
 
-and you may even link to a very specific chapter explaining how to :ref:`create a browser condition <t3tsref:condition-browser>` within the TypoScript Reference.
+	successful import
 
-For a complete reference of available cross-link prefixes, please consult file ``_make/conf.py``.
+Updating files within TYPO3
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+If files change in easydb, they are not automatically updated within TYPO3.
+To update them, import the files in question again. The easydb TYPO3 extension detects
+that files files were previously imported and updates them.
 
-FAQ
-^^^
-
-Possible subsection: FAQ
