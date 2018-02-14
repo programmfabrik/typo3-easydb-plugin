@@ -2,8 +2,13 @@
     "name": "easydb/typo3-integration",
     "type": "typo3-cms-extension",
     "description" : "Integration of easydb asset management in TYPO3 CMS",
-    "license": "LGPL-3.0",
+    "license": "LGPL-3.0-only",
     "authors": [
+        {
+            "name": "Progammfabrik GmbH",
+            "role": "Project manager",
+            "homepage": "https://www.programmfabrik.de"
+        },
         {
             "name": "Helmut Hummel",
             "email": "info@helhum.io",
@@ -11,6 +16,9 @@
             "homepage": "https://helhum.io"
         }
     ],
+    "support": {
+        "issues": "https://github.com/programmfabrik/typo3-easydb-plugin/issues"
+    },
     "require": {
         "php": ">=5.5 <7.2",
         "typo3/cms-core": "^7.6 || ^8.7"
