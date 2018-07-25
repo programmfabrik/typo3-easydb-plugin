@@ -55,7 +55,7 @@ jobs:
     - stage: test
       php: 5.5
       env: TYPO3_VERSION=^7.6
-    - stage: publish in ter
+    - stage: 🚢 to ter
       if: tag IS present
       php: 7.0
       before_install: skip
