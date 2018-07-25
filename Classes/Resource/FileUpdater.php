@@ -35,6 +35,17 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class FileUpdater
 {
+    private static $filePropertiesToImportMapping = [
+        'uid' => 'easydb_uid',
+        'asset_id' => 'easydb_asset_id',
+        'asset_version' => 'easydb_asset_version',
+        'system_object_id' => 'easydb_system_object_id',
+        'objecttype' => 'easydb_objecttype',
+        'object_id' => 'easydb_object_id',
+        'object_version' => 'easydb_object_version',
+        'uuid' => 'easydb_uuid',
+    ];
+
     /**
      * @var Folder
      */
@@ -135,15 +146,25 @@ class FileUpdater
         $this->dataHandler->start(
             [
                 'sys_file' => [
-                    $file->getUid() => [
-                        'easydb_uid' => $fileData['uid'],
-                    ],
+                    $file->getUid() => $this->getFileFieldsFromFileData($fileData),
                 ],
                 'sys_file_metadata' => $metaDataProcessor->mapEsaydbMetaDataToMetaDataRecords($fileData),
             ],
             []
         );
         $this->dataHandler->process_datamap();
+    }
+
+    private function getFileFieldsFromFileData(array $fileData)
+    {
+        $fields = [];
+        foreach (self::$filePropertiesToImportMapping as $easydbName => $typo3Name) {
+            if (isset($fileData[$easydbName])) {
+                $fields[$typo3Name] = $fileData[$easydbName];
+            }
+        }
+
+        return $fields;
     }
 
     private function getExistingMetaDataRecords(File $file)

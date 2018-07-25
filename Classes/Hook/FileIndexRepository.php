@@ -25,6 +25,18 @@ class FileIndexRepository extends \TYPO3\CMS\Core\Resource\Index\FileIndexReposi
 {
     public function __construct()
     {
-        $this->fields[] = 'easydb_uid';
+        $this->fields = array_merge(
+            $this->fields,
+            [
+                'easydb_uid',
+                'easydb_asset_id',
+                'easydb_asset_version',
+                'easydb_system_object_id',
+                'easydb_objecttype',
+                'easydb_object_id',
+                'easydb_object_version',
+                'easydb_uuid',
+            ]
+        );
     }
 }
