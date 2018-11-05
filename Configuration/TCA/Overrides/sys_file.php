@@ -3,7 +3,7 @@ $GLOBALS['TCA']['sys_file']['columns'] = array_replace_recursive(
     $GLOBALS['TCA']['sys_file']['columns'],
     [
         'easydb_uid' => [
-            'label' => 'easydb uid',
+            'label' => 'easydb unique identifier',
             'config' => [
                 'readOnly' => true,
                 'type' => 'input',
@@ -11,7 +11,7 @@ $GLOBALS['TCA']['sys_file']['columns'] = array_replace_recursive(
             ],
         ],
         'easydb_asset_id' => [
-            'label' => 'easydb uid',
+            'label' => 'easydb asset',
             'config' => [
                 'readOnly' => true,
                 'type' => 'input',
@@ -19,7 +19,7 @@ $GLOBALS['TCA']['sys_file']['columns'] = array_replace_recursive(
             ],
         ],
         'easydb_asset_version' => [
-            'label' => 'easydb uid',
+            'label' => 'easydb asset version',
             'config' => [
                 'readOnly' => true,
                 'type' => 'input',
@@ -35,7 +35,7 @@ $GLOBALS['TCA']['sys_file']['columns'] = array_replace_recursive(
             ],
         ],
         'easydb_objecttype' => [
-            'label' => 'easydb uid',
+            'label' => 'easydb object type',
             'config' => [
                 'readOnly' => true,
                 'type' => 'input',
@@ -43,7 +43,7 @@ $GLOBALS['TCA']['sys_file']['columns'] = array_replace_recursive(
             ],
         ],
         'easydb_object_id' => [
-            'label' => 'easydb uid',
+            'label' => 'easydb object',
             'config' => [
                 'readOnly' => true,
                 'type' => 'input',
@@ -51,7 +51,7 @@ $GLOBALS['TCA']['sys_file']['columns'] = array_replace_recursive(
             ],
         ],
         'easydb_object_version' => [
-            'label' => 'easydb uid',
+            'label' => 'easydb object version',
             'config' => [
                 'readOnly' => true,
                 'type' => 'input',
@@ -59,7 +59,7 @@ $GLOBALS['TCA']['sys_file']['columns'] = array_replace_recursive(
             ],
         ],
         'easydb_uuid' => [
-            'label' => 'easydb uid',
+            'label' => 'easydb universally unique identifier',
             'config' => [
                 'readOnly' => true,
                 'type' => 'input',

@@ -10,3 +10,10 @@ $GLOBALS['TYPO3_CONF_VARS']['BE']['defaultUC']['easydb']['windowSize'] = [
     'width' => '650',
     'height' => '600',
 ];
+
+    // new field types
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1524490067] = [
+        'nodeName' => 'easidbInfo',
+        'priority' => 30,
+        'class' => \Easydb\Typo3Integration\Form\Element\EasidbFileInfo::class,
+    ];
