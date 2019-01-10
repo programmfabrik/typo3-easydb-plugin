@@ -138,6 +138,7 @@ class FileListButtonHook
     {
         // Encoding galore
         $serverUrl = rtrim($this->config->get('serverUrl'), '/');
+        $parsedUrl = parse_url($serverUrl);
         $filePickerArgument = \rawurlencode(\base64_encode(\json_encode(
             [
                 'callbackurl' => $this->getCallBackUrl(),
@@ -145,7 +146,12 @@ class FileListButtonHook
                 'extensions' => $this->getAllowedFileExtensions(),
             ]
         )));
-        return $serverUrl . '?typo3filepicker=' . $filePickerArgument;
+
+        return sprintf(
+            $serverUrl . '%stypo3filepicker=%s',
+            isset($parsedUrl['query']) ? '&' : '?',
+            $filePickerArgument
+        );
     }
 
     /**
