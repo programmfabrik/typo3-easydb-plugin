@@ -23,10 +23,11 @@ namespace Easydb\Typo3Integration\Tests\Unit\Backend;
 
 use Easydb\Typo3Integration\Backend\CorsRequestHandler;
 use Easydb\Typo3Integration\ExtensionConfig;
+use Nimut\TestingFramework\TestCase\UnitTestCase;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Http\ServerRequest;
 
-class CorsRequestHandlerTest extends \PHPUnit_Framework_TestCase
+class CorsRequestHandlerTest extends UnitTestCase
 {
     /**
      * @test

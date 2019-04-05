@@ -54,12 +54,16 @@ class SystemLanguages
             $db = $GLOBALS['TYPO3_DB'];
             $languageRecords = $db->exec_SELECTgetRows('uid,easydb_locale', 'sys_language', '1=1' . BackendUtility::deleteClause('sys_language') . BackendUtility::BEenableFields('sys_language'));
         }
-        $languagesByIsoCode = [
-            $this->config->get('defaultLocale') => 0,
-        ];
+        $languagesByIsoCode = [];
         foreach ($languageRecords as $languageRecord) {
             $languagesByIsoCode[$languageRecord['easydb_locale']] = $languageRecord['uid'];
         }
+
         return $languagesByIsoCode;
+    }
+
+    public function getDefaultLanguageLocale()
+    {
+        return $this->config->get('defaultLocale');
     }
 }

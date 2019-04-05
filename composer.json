@@ -20,11 +20,11 @@
         "issues": "https://github.com/programmfabrik/typo3-easydb-plugin/issues"
     },
     "require": {
-        "php": ">=5.5 <7.2",
+        "php": ">=5.5 <7.4",
         "typo3/cms-core": "^7.6 || ^8.7"
     },
     "require-dev": {
-        "nimut/testing-framework": "^1.1.8",
+        "nimut/testing-framework": "^3",
         "typo3/cms": "^8.7"
     },
     "autoload": {

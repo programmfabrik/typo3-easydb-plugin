@@ -22,7 +22,6 @@ namespace Easydb\Typo3Integration\Persistence;
  ***************************************************************/
 
 use TYPO3\CMS\Core\DataHandling\DataHandler;
-use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class MetaDataProcessor
@@ -59,52 +58,78 @@ class MetaDataProcessor
         // Unset special easydb fields
         unset($existingMetaDataFields['uid'], $existingMetaDataFields['url'], $existingMetaDataFields['filename']);
 
+        $defaultLanguageMetaUid = $this->metaData[0]['uid'];
+        $defaultLanguageLocale = $this->languages->getDefaultLanguageLocale();
         foreach ($existingMetaDataFields as $fieldName => $metaDataValue) {
-            $metaRecordUid = $this->metaData[0]['uid'];
-            $fieldValue = $metaDataValue;
-            if (is_array($metaDataValue) && isset($metaDataValue[0])) {
-                // we have an array value
-                if (!is_array($metaDataValue[0])) {
-                    // No locales
-                    $metaDataValue = implode(', ', $metaDataValue);
-                } else {
-                    $arrayValue = $metaDataValue;
-                    $metaDataValue = [];
-                    $fieldValue = '';
-                    foreach ($arrayValue as $singleValue) {
-                        foreach ($singleValue as $locale => $value) {
-                            $metaDataValue[$locale][] = $value;
-                        }
+            foreach ($this->normalizeSentMetaDataValue($metaDataValue, $defaultLanguageLocale) as $locale => $fieldValue) {
+                // By default use uid of default language meta data record
+                $metaRecordUid = $defaultLanguageMetaUid;
+                $languageUid = 0;
+                if (isset($systemLanguages[$locale])) {
+                    $languageUid = $systemLanguages[$locale];
+                    $metaRecordUid = $this->getMetaUidByLanguage($languageUid);
+                    if ($locale === $defaultLanguageLocale && $GLOBALS['BE_USER']->checkLanguageAccess(0)) {
+                        // Additionally expose to default language in case locale matches
+                        $metaDataUpdates[$defaultLanguageMetaUid][$fieldName] = $fieldValue;
                     }
                 }
-            }
-            if (is_array($metaDataValue)) {
-                foreach ($metaDataValue as $locale => $fieldValue) {
-                    if (isset($systemLanguages[$locale])) {
-                        $languageUid = $systemLanguages[$locale];
-                        if (isset($this->metaData[$languageUid])) {
-                            $metaRecordUid = $this->metaData[$languageUid]['uid'];
-                        } else {
-                            $this->dataHandler->start([], []);
-                            $metaRecordUid = $this->dataHandler->localize('sys_file_metadata', $this->metaData[0]['uid'], $languageUid);
-                            $this->metaData[$languageUid]['uid'] = $metaRecordUid;
-                        }
-                    } else {
-                        $metaRecordUid = $this->metaData[0]['uid'];
-                    }
-                    if (is_array($fieldValue)) {
-                        $fieldValue = implode(', ', $fieldValue);
-                    }
+                if ($GLOBALS['BE_USER']->checkLanguageAccess($languageUid)) {
                     $metaDataUpdates[$metaRecordUid][$fieldName] = $fieldValue;
                 }
-            } else {
-                if (is_array($fieldValue)) {
-                    $fieldValue = implode(', ', $fieldValue);
-                }
-                $metaDataUpdates[$metaRecordUid][$fieldName] = $fieldValue;
             }
         }
 
         return $metaDataUpdates;
+    }
+
+    private function getMetaUidByLanguage($languageUid)
+    {
+        if (isset($this->metaData[$languageUid])) {
+            $metaRecordUid = $this->metaData[$languageUid]['uid'];
+        } else {
+            $this->dataHandler->start([], []);
+            $metaRecordUid = $this->dataHandler->localize('sys_file_metadata', $this->metaData[0]['uid'], $languageUid);
+            $this->metaData[$languageUid]['uid'] = $metaRecordUid;
+        }
+
+        return $metaRecordUid;
+    }
+
+    public function normalizeSentMetaDataValue($metaDataValue, $defaultLocale)
+    {
+        if (is_array($metaDataValue) && !isset($metaDataValue[0])) {
+            // Default case: A map of locales with their scalar (string) values
+            return $metaDataValue;
+        }
+        if (!is_array($metaDataValue)) {
+            // Value is simple type and has no locales
+            // Return with default locale
+            return [$defaultLocale => $metaDataValue];
+        }
+        if (isset($metaDataValue[0]) && !is_array($metaDataValue[0])) {
+            // We have an array value (e.g. multiple tag names), but no locales
+            // Implode the value and handle like simple case
+            return $this->normalizeSentMetaDataValue(implode(', ', $metaDataValue), $defaultLocale);
+        }
+        if (isset($metaDataValue[0]) && is_array($metaDataValue[0])) {
+            // We have an array value with localizations
+            // Resolve those into a simple locale -> string hash map
+            $normalizedValue = [];
+            foreach ($metaDataValue as $singleValue) {
+                foreach ($singleValue as $locale => $value) {
+                    $normalizedValue[$locale][] = $value;
+                }
+            }
+
+            return array_map(
+                function (array $value) {
+                    return implode(', ', $value);
+                },
+                $normalizedValue
+            );
+        }
+
+        // Something went wrong, but we gracefully proceed
+        return [];
     }
 }
