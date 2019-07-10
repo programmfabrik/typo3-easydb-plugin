@@ -174,6 +174,7 @@ class FileListButtonHook
     private function getExistingFiles()
     {
         $folderId = isset($_GET['id']) ? $_GET['id'] : $this->getRootLevelFolder();
+
         return (new FileUpdater($this->resourceFactory->getFolderObjectFromCombinedIdentifier($folderId)))->getFilesMap();
     }
 
