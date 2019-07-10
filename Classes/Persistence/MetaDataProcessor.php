@@ -21,6 +21,7 @@ namespace Easydb\Typo3Integration\Persistence;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -89,6 +90,7 @@ class MetaDataProcessor
         } else {
             $this->dataHandler->start([], []);
             $metaRecordUid = $this->dataHandler->localize('sys_file_metadata', $this->metaData[0]['uid'], $languageUid);
+            $this->resetDataHandler();
             $this->metaData[$languageUid]['uid'] = $metaRecordUid;
         }
 
@@ -131,5 +133,18 @@ class MetaDataProcessor
 
         // Something went wrong, but we gracefully proceed
         return [];
+    }
+
+    /**
+     * This is required to reset the state of the data handler
+     * in order to allow to localize records multiple times in one request.
+     */
+    private function resetDataHandler()
+    {
+        $cache = GeneralUtility::makeInstance(CacheManager::class)->getCache('cache_runtime');
+        $nestedElementCalls = $cache->get('core-datahandler-nestedElementCalls-');
+        unset($nestedElementCalls['localize']['sys_file_metadata'][$this->metaData[0]['uid']]);
+        $cache->set('core-datahandler-nestedElementCalls-', $nestedElementCalls);
+        $this->dataHandler->copyMappingArray = [];
     }
 }
