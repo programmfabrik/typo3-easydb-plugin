@@ -27,7 +27,6 @@ define(['jquery'], function($) {
 		},
 
 		handleMessageEvent: function(event) {
-			console.log(event.data['easydb']);
 			if (event.data['easydb']) {
 				if (event.data['easydb']['action'] === 'reload') {
 					window.location.reload();
