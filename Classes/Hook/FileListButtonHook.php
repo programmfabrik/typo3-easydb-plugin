@@ -104,9 +104,7 @@ class FileListButtonHook
     {
         $buttons = $params['buttons'];
         // Only add the button to file list module
-        // Strange API that requires to query super globals, but that's how it currently is
-        // At least we have an almost clean way to add additional buttons
-        if (!isset($_GET['M']) || 'file_FilelistList' !== $_GET['M']) {
+        if (!$this->isFileListModuleUri()) {
             return $buttons;
         }
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Easydb/EasydbAdapter');
@@ -210,5 +208,18 @@ class FileListButtonHook
             return $fileStorage->getUid() . ':' . $fileStorage->getRootLevelFolder()->getIdentifier();
         }
         throw new \RuntimeException('Could not find any folder to be displayed.', 1498569603);
+    }
+
+    /**
+     * Strange API that requires to query super globals, but that's how it currently is.
+     * At least we have an almost clean way to add additional buttons.
+     *
+     * @return bool
+     */
+    private function isFileListModuleUri(): bool
+    {
+
+        return (isset($_GET['M']) && $_GET['M'] === 'file_FilelistList')
+            || (isset($_GET['route']) && $_GET['route'] === '/file/FilelistList/');
     }
 }
