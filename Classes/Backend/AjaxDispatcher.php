@@ -37,6 +37,7 @@ class AjaxDispatcher
         foreach ($this->resolveRequestHandlers($request) as $requestHandler) {
             $response = $requestHandler->handleRequest($request, $response);
         }
+
         return $response;
     }
 

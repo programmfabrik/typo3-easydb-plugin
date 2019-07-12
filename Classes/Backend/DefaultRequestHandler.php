@@ -90,6 +90,11 @@ class DefaultRequestHandler implements RequestHandlerInterface
         if (!$this->canHandleRequest($request)) {
             return $response;
         }
-        return $this->importFilesController->importAction($request, $response);
+        $response = $this->importFilesController->importAction($request, $response);
+
+        return $response->withHeader(
+            'Content-Type',
+            'application/json; charset=utf-8'
+        );
     }
 }
