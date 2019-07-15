@@ -20,7 +20,7 @@ before_install:
   - if php -i | grep -q xdebug; then phpenv config-rm xdebug.ini; fi
 
 install:
-  - composer require typo3/cms="$TYPO3_VERSION"
+  - composer require nimut/typo3-complete="$TYPO3_VERSION"
   - export TYPO3_PATH_WEB=$PWD/.Build/Web
 
 script:
@@ -51,10 +51,10 @@ jobs:
       env: TYPO3_VERSION=^8.7
     - stage: test
       php: 7.1
-      env: TYPO3_VERSION=^7.6
+      env: TYPO3_VERSION=^7.6.1
     - stage: test
       php: 7.0
-      env: TYPO3_VERSION=^7.6
+      env: TYPO3_VERSION=^7.6.1
     - stage: 🚢 to ter
       if: tag IS present
       php: 7.0
