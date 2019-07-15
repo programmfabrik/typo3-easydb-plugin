@@ -14,11 +14,11 @@ return [
         'easydb/cors' => [
             'target' => \Easydb\Typo3Integration\Backend\Middleware\CorsMiddleware::class,
             'before' => [
-                'typo3/cms-backend/authentication'
+                'typo3/cms-backend/authentication',
             ],
             'after' => [
-                'typo3/cms-backend/backend-routing'
+                'typo3/cms-backend/backend-routing',
             ],
         ],
-    ]
+    ],
 ];

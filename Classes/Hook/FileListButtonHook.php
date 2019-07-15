@@ -218,7 +218,6 @@ class FileListButtonHook
      */
     private function isFileListModuleUri(): bool
     {
-
         return (isset($_GET['M']) && $_GET['M'] === 'file_FilelistList')
             || (isset($_GET['route']) && $_GET['route'] === '/file/FilelistList/');
     }
