@@ -131,7 +131,7 @@ class FileUpdater
         foreach ($this->targetFolder->getFiles() as $file) {
             if ($easydbUid = $file->getProperty('easydb_uid')) {
                 $this->files[$easydbUid] = $file;
-                $this->filesMap[] = [$easydbUid => $easydbUid];
+                $this->filesMap[] = ['uid' => $easydbUid];
             }
         }
     }
