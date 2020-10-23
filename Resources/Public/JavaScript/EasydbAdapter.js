@@ -4,11 +4,11 @@
 define(['jquery'], function ($) {
     'use strict';
 
+    var pickerButton;
     var easydbAdapter = {
-
         openPicker: function (event) {
             event.preventDefault();
-            var $arguments = $(event.target).data('arguments');
+            var $arguments = pickerButton.data('arguments');
             easydbAdapter.filePickerWindow = window.open(
                     $arguments['targetUrl'],
                     'easydb_picker',
@@ -33,6 +33,19 @@ define(['jquery'], function ($) {
                 }
                 if (event.data['easydb']['action'] === 'close') {
                     easydbAdapter.closePicker();
+                    easydbAdapter.filePickerWindow = null;
+                }
+                if (event.data['easydb']['action'] === 'send_config') {
+                    if (easydbAdapter.filePickerWindow) {
+                        easydbAdapter.filePickerWindow.postMessage(
+                            {
+                                "typo3": {
+                                    "config": pickerButton.data('arguments')['config']
+                                }
+                            },
+                            '*'
+                        );
+                    }
                 }
             }
         },
@@ -43,7 +56,8 @@ define(['jquery'], function ($) {
         addEventListeners: function () {
             window.addEventListener('message', this.handleMessageEvent);
             $(function () {
-                $('.button__file-list-easydb').on('click', easydbAdapter.openPicker);
+                pickerButton = $('.button__file-list-easydb');
+                pickerButton.on('click', easydbAdapter.openPicker);
             });
         }
     };

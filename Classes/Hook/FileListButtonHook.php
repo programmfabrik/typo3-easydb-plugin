@@ -122,6 +122,11 @@ class FileListButtonHook
                 'arguments' => \json_encode(
                     [
                         'targetUrl' => $this->getTargetUrl(),
+                        'config' => \base64_encode(\json_encode([
+                            'callbackurl' => $this->getCallBackUrl(),
+                            'existing_files' => $this->getExistingFiles(),
+                            'extensions' => $this->getAllowedFileExtensions(),
+                        ])),
                         'window' => $this->getWindowSize(),
                     ]
                 ),
@@ -141,8 +146,6 @@ class FileListButtonHook
         $filePickerArgument = \rawurlencode(\base64_encode(\json_encode(
             [
                 'callbackurl' => $this->getCallBackUrl(),
-                'existing_files' => $this->getExistingFiles(),
-                'extensions' => $this->getAllowedFileExtensions(),
             ]
         )));
 
