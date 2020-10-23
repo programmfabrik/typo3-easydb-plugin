@@ -1,6 +1,8 @@
 <?php
 namespace Easydb\Typo3Integration;
 
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 /***************************************************************
  *  Copyright notice
  *
@@ -24,6 +26,9 @@ namespace Easydb\Typo3Integration;
 class ExtensionConfig
 {
     private static $extensionKey = 'easydb';
+    private static $defaults = [
+        'allowSessionTransfer' => false,
+    ];
 
     /**
      * @var array
@@ -33,6 +38,7 @@ class ExtensionConfig
     public function __construct(array $config = null)
     {
         $this->config = $config ?: unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][self::$extensionKey]);
+        $this->config = array_replace(self::$defaults, $this->config);
         $this->setDerivedConfigOptions();
     }
 
@@ -49,5 +55,20 @@ class ExtensionConfig
         $parsedUrl = parse_url($this->config['serverUrl']);
         $this->config['serverHostName'] = $parsedUrl['host'];
         $this->config['allowedOrigin'] = $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
+        $this->config['transferSession'] = $this->needsSessionTransfer($parsedUrl['host']);
+    }
+
+    private function needsSessionTransfer($easyDbHostName)
+    {
+        $sameSiteCookieOption = $GLOBALS['TYPO3_CONF_VARS']['BE']['cookieSameSite'] ?? 'lax';
+
+        return $this->config['allowSessionTransfer']
+            && $sameSiteCookieOption !== 'none'
+            && $this->siteName($easyDbHostName) !== $this->siteName(GeneralUtility::getIndpEnv('TYPO3_HOST_ONLY'));
+    }
+
+    private function siteName($fullHost)
+    {
+        return implode('.', array_slice(explode('.', $fullHost), -2));
     }
 }

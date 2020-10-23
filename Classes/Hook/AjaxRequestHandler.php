@@ -21,6 +21,9 @@ namespace Easydb\Typo3Integration\Hook;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Easydb\Typo3Integration\Backend\Session;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Core\Bootstrap;
 
 /**
@@ -31,9 +34,27 @@ use TYPO3\CMS\Core\Core\Bootstrap;
  */
 class AjaxRequestHandler extends \TYPO3\CMS\Backend\Http\AjaxRequestHandler
 {
+    private static $ajaxRoute = '/ajax/easydb/import';
+
     public function __construct(Bootstrap $bootstrap)
     {
         parent::__construct($bootstrap);
-        $this->publicAjaxIds[] = '/ajax/easydb/import';
+        $this->publicAjaxIds[] = self::$ajaxRoute;
+    }
+
+    public function handleRequest(ServerRequestInterface $request)
+    {
+        $ajaxID = isset($request->getParsedBody()['ajaxID']) ? $request->getParsedBody()['ajaxID'] : $request->getQueryParams()['ajaxID'];
+        $easyDbSessionId = isset($request->getQueryParams()['easydb_ses_id']) ? $request->getQueryParams()['easydb_ses_id'] : null;
+        if ($ajaxID === self::$ajaxRoute
+            && is_string($easyDbSessionId)
+            && empty($_COOKIE[BackendUserAuthentication::getCookieName()])
+            && $request->getMethod() === 'POST'
+            && ($session = new Session())->hasTypo3SessionForEasyDbSession($easyDbSessionId)
+        ) {
+            $_COOKIE[BackendUserAuthentication::getCookieName()] = $session->fetchTypo3SessionByEasyDbSession($easyDbSessionId);
+        }
+
+        return parent::handleRequest($request);
     }
 }

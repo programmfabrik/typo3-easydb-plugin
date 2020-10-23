@@ -15,6 +15,9 @@
 			<trans-unit id="config.defaultLocale">
 				<source>easydb locale for the TYPO3 default language</source>
 			</trans-unit>
+			<trans-unit id="config.allowSessionTransfer">
+				<source>Allow to transfer the session to allow Chrome browser to work when session cookie is not sent.</source>
+			</trans-unit>
 			<trans-unit id="action.insertFile">
 				<source>Added file "%1$s" from easydb</source>
 			</trans-unit>

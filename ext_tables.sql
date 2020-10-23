@@ -11,3 +11,6 @@ CREATE TABLE sys_file (
 CREATE TABLE sys_language (
 	easydb_locale varchar(255) DEFAULT '' NOT NULL
 );
+CREATE TABLE be_sessions (
+	easydb_ses_id varchar(32) DEFAULT '' NOT NULL
+);

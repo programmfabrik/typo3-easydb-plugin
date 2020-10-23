@@ -21,6 +21,7 @@ namespace Easydb\Typo3Integration\Hook;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Easydb\Typo3Integration\Backend\Session;
 use Easydb\Typo3Integration\ExtensionConfig;
 use Easydb\Typo3Integration\Resource\FileUpdater;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -159,14 +160,26 @@ class FileListButtonHook
      */
     private function getCallBackUrl()
     {
+        $uriArguments = [
+            'id' => isset($_GET['id']) ? $_GET['id'] : $this->getRootLevelFolder(),
+            'importToken' => $this->formProtection->generateToken('easydb', 'fileImport'),
+        ];
+        if ($this->config->get('transferSession')) {
+            $uriArguments['easydb_ses_id'] = $this->generateSessionId();
+        }
+
         return (string)$this->uriBuilder->buildUriFromRoute(
             'ajax_easydb_import',
-            [
-                'id' => isset($_GET['id']) ? $_GET['id'] : $this->getRootLevelFolder(),
-                'importToken' => $this->formProtection->generateToken('easydb', 'fileImport'),
-            ],
+            $uriArguments,
             UriBuilder::ABSOLUTE_URL
         );
+    }
+
+    private function generateSessionId()
+    {
+        $typo3SessionId = !empty($GLOBALS['BE_USER']->id) ? $GLOBALS['BE_USER']->id : '';
+
+        return (new Session())->fetchEasyDbSessionByTypo3Session($typo3SessionId);
     }
 
     private function getExistingFiles()

@@ -22,10 +22,12 @@ namespace Easydb\Typo3Integration\Backend\Middleware;
  ***************************************************************/
 
 use Easydb\Typo3Integration\Backend\CorsRequestHandler;
+use Easydb\Typo3Integration\Backend\Session;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -36,22 +38,23 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class CorsMiddleware implements MiddlewareInterface
 {
-    /**
-     * @var CorsRequestHandler
-     */
-    private $corsRequestHandler;
-
-    public function __construct(CorsRequestHandler $corsRequestHandler = null)
-    {
-        $this->corsRequestHandler = $corsRequestHandler ?? GeneralUtility::makeInstance(CorsRequestHandler::class);
-    }
-
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if ($request->getMethod() !== 'OPTIONS' || !$this->corsRequestHandler->canHandleRequest($request)) {
-            return $handler->handle($request);
+        if ($request->getMethod() === 'OPTIONS' && ($corsRequestHandler = GeneralUtility::makeInstance(CorsRequestHandler::class))->canHandleRequest($request)) {
+            return $corsRequestHandler->handleRequest($request, new Response());
+        }
+        $routeName = $request->getQueryParams()['route'] ?? null;
+        $easyDbSessionId = $request->getQueryParams()['easydb_ses_id'] ?? null;
+        if (is_string($routeName)
+            && $routeName === '/ajax/easydb/import'
+            && is_string($easyDbSessionId)
+            && empty($_COOKIE[BackendUserAuthentication::getCookieName()])
+            && $request->getMethod() === 'POST'
+            && ($session = new Session())->hasTypo3SessionForEasyDbSession($easyDbSessionId)
+        ) {
+            $_COOKIE[BackendUserAuthentication::getCookieName()] = $session->fetchTypo3SessionByEasyDbSession($easyDbSessionId);
         }
 
-        return $this->corsRequestHandler->handleRequest($request, new Response());
+        return $handler->handle($request);
     }
 }
