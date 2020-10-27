@@ -18,6 +18,7 @@ branches:
 # This is executed for all stages
 before_install:
   - if php -i | grep -q xdebug; then phpenv config-rm xdebug.ini; fi
+  - composer self-update --1
 
 install:
   - composer require nimut/typo3-complete="$TYPO3_VERSION"
