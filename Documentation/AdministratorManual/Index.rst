@@ -42,7 +42,7 @@ Select the extension configuration for easydb extension within you3 TYPO3 instal
 	Extension Configuration
 
 URL to your easydb server
-^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You need to specify the URL to your easydb server.
 
@@ -64,12 +64,12 @@ You can choose between the two modes in your esadb settings:
 
 
 File extensions that shall be imported from easydb
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A comma separated list of file extensions that are allowed to be imported into TYPO3.
 
 easydb locale for the TYPO3 default language
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In case you have a multi language TYPO3 project, you need to provide a mapping between TYPO3 languages
 and easydb locales. In extension configuration you specify the easydb locale for the TYPO3 default language.
@@ -85,8 +85,11 @@ in the following screen shot.
 
 
 Allow Session Transfer
-^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~
 
 Only set this checkbox, if it really is required and you understood the impact!
 Better options are: Setting `BE/cookieSameSite` to `none` in TYPO3 configuration,
 or to have the easydb hostname on the same top level domain as your TYPO3 backend.
+
+Detailed explanation
+^^^^^^^^^^^^^^^^^^^^

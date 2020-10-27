@@ -44,7 +44,7 @@ After confirming the import, the selected files from easydb are imported into th
 	successful import
 
 Updating files within TYPO3
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If files change in easydb, they are not automatically updated within TYPO3.
 To update them, import the files in question again. The easydb TYPO3 extension detects
