@@ -82,3 +82,11 @@ in the following screen shot.
 	:alt: easydb locale in TYPO3 language record
 
 	easydb locale in TYPO3 language record
+
+
+Allow Session Transfer
+^^^^^^^^^^^^^^^^^^^^^^
+
+Only set this checkbox, if it really is required and you understood the impact!
+Better options are: Setting `BE/cookieSameSite` to `none` in TYPO3 configuration,
+or to have the easydb hostname on the same top level domain as your TYPO3 backend.
