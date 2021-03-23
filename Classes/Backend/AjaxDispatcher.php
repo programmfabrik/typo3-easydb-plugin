@@ -23,6 +23,7 @@ namespace Easydb\Typo3Integration\Backend;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class AjaxDispatcher
@@ -32,8 +33,11 @@ class AjaxDispatcher
         CorsRequestHandler::class,
     ];
 
-    public function dispatchRequest(ServerRequestInterface $request, ResponseInterface $response)
+    public function dispatchRequest(ServerRequestInterface $request, ResponseInterface $response = null)
     {
+        if ($response === null) {
+            $response = new JsonResponse();
+        }
         foreach ($this->resolveRequestHandlers($request) as $requestHandler) {
             $response = $requestHandler->handleRequest($request, $response);
         }
