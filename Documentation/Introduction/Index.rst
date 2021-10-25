@@ -10,7 +10,7 @@ What does it do?
 ================
 
 This extension allows users to import media files from easydb_ digital asset management system into a TYPO3 file storage.
-It is compatible with all supported TYPO3 LTS versions (currently 7.6 and 8.7).
+It is compatible with all supported TYPO3 LTS versions.
 
 The to be imported files can be selected in a popup window, which shows the easydb file picker UI.
 When pressing the import button, these files are copied into the TYPO3 storage.
