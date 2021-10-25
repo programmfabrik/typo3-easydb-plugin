@@ -3,6 +3,8 @@ namespace Easydb\Typo3Integration\Backend;
 
 use TYPO3\CMS\Core\Crypto\Random;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Session\Backend\HashableSessionBackendInterface;
+use TYPO3\CMS\Core\Session\SessionManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class Session
@@ -28,7 +30,7 @@ class Session
         $easyDbSessionId = (string)$connection->select(
             ['easydb_ses_id'],
             'be_sessions',
-            ['ses_id' => $typo3SessionId]
+            ['ses_id' => $this->hashSessionId($typo3SessionId)]
         )->fetchColumn();
 
         if (empty($easyDbSessionId)) {
@@ -43,7 +45,7 @@ class Session
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('be_sessions');
 
         return (string)$connection->select(
-            ['ses_id'],
+            ['cookie_value'],
             'be_sessions',
             ['easydb_ses_id' => $easyDbSessionId]
         )->fetchColumn();
@@ -53,15 +55,27 @@ class Session
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('be_sessions');
         $sessionId = (new Random())->generateRandomHexString(32);
+        $cookieValue = $GLOBALS['BE_USER']->id ?? '';
         $connection->update(
             'be_sessions',
             [
+                'cookie_value' => $cookieValue,
                 'easydb_ses_id' => $sessionId,
             ],
             [
-                'ses_id' => $GLOBALS['BE_USER']->id ?? '',
+                'ses_id' => $this->hashSessionId($cookieValue),
             ]
         );
+
+        return $sessionId;
+    }
+
+    private function hashSessionId($sessionId)
+    {
+        $backend = GeneralUtility::makeInstance(SessionManager::class)->getSessionBackend('BE');
+        if ($backend instanceof HashableSessionBackendInterface) {
+            return $backend->hash($sessionId);
+        }
 
         return $sessionId;
     }

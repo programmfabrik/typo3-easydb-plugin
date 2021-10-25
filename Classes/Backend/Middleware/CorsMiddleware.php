@@ -45,8 +45,7 @@ class CorsMiddleware implements MiddlewareInterface
         }
         $routeName = $request->getQueryParams()['route'] ?? null;
         $easyDbSessionId = $request->getQueryParams()['easydb_ses_id'] ?? null;
-        if (is_string($routeName)
-            && $routeName === '/ajax/easydb/import'
+        if ($routeName === '/ajax/easydb/import'
             && is_string($easyDbSessionId)
             && empty($_COOKIE[BackendUserAuthentication::getCookieName()])
             && $request->getMethod() === 'POST'

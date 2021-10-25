@@ -130,7 +130,10 @@ To fix this issue, it is recommended to either change the eadydb host name to be
 a subdomain of the typo3 domain, or to configure TYPO3 to set the backend
 cookie to `SameSite` `none`. With the latter the CSRF protection of the cookie
 is disabled, but TYPO3 itself implements a different token based CSRF protection
-anyway, so the risk in doing so is negligible.
+anyway, so the risk in doing so is negligible. Please note, that with this solution,
+every client browser used must be configured to allow sending cross-site cookies.
+Recent browser versions opted to change the defaults to disallow sending cross-site cookies
+to prevent cross site tracking.
 
 If both options are not possible or not quickly possible, the easydb adapter for TYPO3
 has the option to allow a "session transfer" to the easydb server, so that
@@ -148,3 +151,8 @@ The session id that is sent to the easydb server isn't the regular TYPO3 session
 and it will only be valid for file imports, but knowing this session id
 will allow an attacker knowing this id to import files in any folder the
 user has access to.
+
+When choosing this option, recent TYPO3 security improvements on how session records are stored
+in the database are reverted and the cookie value of the TYPO3 session is again
+stored in clear text in the database. Therefore it is highly recommended to chose a different
+option from above.

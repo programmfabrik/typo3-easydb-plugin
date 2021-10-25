@@ -12,5 +12,6 @@ CREATE TABLE sys_language (
 	easydb_locale varchar(255) DEFAULT '' NOT NULL
 );
 CREATE TABLE be_sessions (
+	cookie_value varchar(32) DEFAULT '' NOT NULL,
 	easydb_ses_id varchar(32) DEFAULT '' NOT NULL
 );
