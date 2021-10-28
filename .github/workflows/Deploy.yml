@@ -8,7 +8,7 @@ on:
 jobs:
     Ship-to-TER:
         name: 'Ship to TER'
-        if: github.repository == 'helhum/easydb-typo3-integration'
+        if: github.repository == 'programmfabrik/typo3-easydb-plugin'
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout
