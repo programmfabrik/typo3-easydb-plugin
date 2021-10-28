@@ -18,7 +18,7 @@ a server URL to your easydb server.
 
 You can limit the allowed file extensions of files that can be imported from easydb.
 
-![Extension Manager Configuration](https://github.com/programmfabrik/typo3-easydb-plugin/raw/master/Documentation/Images/AdministratorManual/ExtensionConfiguration.png)
+![Extension Manager Configuration](https://github.com/programmfabrik/typo3-easydb-plugin/raw/main/Documentation/Images/AdministratorManual/ExtensionConfiguration.png)
 
 Just specify a comma separated list extensions.
 
@@ -29,4 +29,4 @@ If you don't need multi language support, you will be good to go. Otherwise read
 The only thing you need to do is set the easydb locale that should be mapped to the TYPO3 default
 language in the extension manager configuration and set the according easydb locale in each TYPO3 language record.
 
-![Extension Manager Configuration](https://github.com/programmfabrik/typo3-easydb-plugin/raw/master/Documentation/Images/AdministratorManual/LocaleForLanguage.png)
+![Extension Manager Configuration](https://github.com/programmfabrik/typo3-easydb-plugin/raw/main/Documentation/Images/AdministratorManual/LocaleForLanguage.png)
