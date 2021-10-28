@@ -1,5 +1,7 @@
 # TYPO3 [easydb](http://5.docs.easydb.de/docs/webfrontend/datamanagement/features/plugins/?node=4,4.1.3) integration
 
+[![Build Status](https://github.com/programmfabrik/typo3-easydb-plugin/actions/workflows/Test.yml/badge.svg?branch=main)](https://github.com/programmfabrik/typo3-easydb-plugin/actions/workflows/Test.yml)
+
 This TYPO3 extension provides an interface in the TYPO3 backend
 to access and import files from easydb digital asset management.
 
