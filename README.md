@@ -7,7 +7,7 @@ to access and import files from easydb digital asset management.
 
 ## Installation
 
-Either [download and install](https://typo3.org/extensions/repository/view/typo3_console) it from TER,
+Either [download and install](https://extensions.typo3.org/extension/easydb) it from TER,
 or install it with composer: `composer require easydb/typo3-integration`
 
 ## Configuration
