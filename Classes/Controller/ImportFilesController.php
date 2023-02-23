@@ -60,24 +60,27 @@ class ImportFilesController
         $this->backendUserAuthentication = $backendUserAuthentication ?: $GLOBALS['BE_USER'];
     }
 
-    public function importAction(ServerRequestInterface $request, ResponseInterface $response)
+    public function importAction(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
+        $importStart = round(microtime(true) * 1000);
         $fileUpdater = new FileUpdater($this->resourceFactory->getFolderObjectFromCombinedIdentifier($request->getQueryParams()['id']));
         try {
             $easydbRequest = EasydbRequest::fromServerRequest($request);
         } catch (\Exception $e) {
-            return [
+            $response->getBody()->write(json_encode([
                 'status' => 'error',
                 'error' => [
                     'code' => 'error.typo3.request',
                     'description' => $e->getMessage(),
                 ],
-            ];
+            ], JSON_THROW_ON_ERROR));
+            return $response;
         }
 
         $addedFiles = [];
-
-        $this->backendUserAuthentication->uc['easydb']['windowSize'] = $easydbRequest->getWindowSize();
+        $userConfig = (array)$this->backendUserAuthentication->uc;
+        $userConfig['easydb']['windowSize'] = $easydbRequest->getWindowSize();
+        $this->backendUserAuthentication->uc = $userConfig;
         $this->backendUserAuthentication->writeUC();
 
         foreach ($easydbRequest->getFiles() as $fileData) {
@@ -113,14 +116,14 @@ class ImportFilesController
 
         $easyDBResponse = [
             'files' => $addedFiles,
-            'took' => round(microtime(true) * 1000) - $GLOBALS['PARSETIME_START'],
+            'took' => round(microtime(true) * 1000) - $importStart,
         ];
         $response->getBody()->write(json_encode($easyDBResponse));
 
         return $response;
     }
 
-    private function addFlashMessage($message, array $arguments = [])
+    private function addFlashMessage($message, array $arguments = []): void
     {
         $languagePrefix = 'LLL:EXT:easydb/Resources/Private/Language/locallang.xlf:action.';
         $languageTitleSuffix = '.title';
@@ -134,7 +137,7 @@ class ImportFilesController
         );
     }
 
-    private function translate($label, array $arguments = [])
+    private function translate($label, array $arguments = []): string
     {
         if (empty($arguments)) {
             return $GLOBALS['LANG']->sL($label);
