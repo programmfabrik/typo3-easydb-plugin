@@ -1,6 +1,7 @@
 <?php
 $columns = [
     'easydb_info' => [
+        'label' => 'LLL:EXT:easydb/Resources/Private/Language/locallang.xlf:label.easydb.info',
         'config' => [
             'type' => 'user',
             'renderType' => 'easidbInfo',

@@ -35,6 +35,9 @@
             <trans-unit id="label.language.locale">
                 <source>easydb locale:</source>
             </trans-unit>
+            <trans-unit id="label.easydb.info">
+                <source>easydb fields</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>
