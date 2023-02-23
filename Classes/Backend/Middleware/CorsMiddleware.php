@@ -67,13 +67,13 @@ class CorsMiddleware implements MiddlewareInterface
         }
         $response = null;
         if (empty($_COOKIE[BackendUserAuthentication::getCookieName()])) {
-            $response = new JsonResponse([
+            $response = (new JsonResponse([
                 'status' => 'error',
                 'error' => [
                     'code' => 'error.typo3.request',
                     'description' => 'No cookie present. Did you configure everything correctly? Are cross site cookies allowed in your browser?',
                 ],
-            ]);
+            ]))->withStatus(403, 'No cookie present, authentication failed!');
         }
 
         try {
