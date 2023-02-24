@@ -1,29 +1,12 @@
 <?php
-namespace Easydb\Typo3Integration\Hook;
+declare(strict_types=1);
 
-/***************************************************************
- *  Copyright notice
- *
- *  (c) 2017 Helmut Hummel <info@helhum.io>
- *  All rights reserved
- *
- *  The GNU General Public License can be found at
- *  http://www.gnu.org/copyleft/gpl.html.
- *  A copy is found in the text file GPL.txt and important notices to the license
- *  from the author is found in LICENSE.txt distributed with these scripts.
- *
- *
- *  This script is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  This copyright notice MUST APPEAR in all copies of the script!
- ***************************************************************/
+namespace Easydb\Typo3Integration\Hook;
 
 use Easydb\Typo3Integration\Backend\Session;
 use Easydb\Typo3Integration\ExtensionConfig;
 use Easydb\Typo3Integration\Resource\FileUpdater;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
@@ -34,6 +17,7 @@ use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
+use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -91,17 +75,23 @@ class FileListButtonHook
         BackendUserAuthentication $backendUserAuthentication = null,
         AbstractFormProtection $formProtection = null
     ) {
-        $this->config = $config ?: new ExtensionConfig();
-        $this->iconFactory = $iconFactory ?: GeneralUtility::makeInstance(IconFactory::class);
-        $this->languageService = $languageService ?: $GLOBALS['LANG'];
-        $this->uriBuilder = $uriBuilder ?: GeneralUtility::makeInstance(UriBuilder::class);
-        $this->pageRenderer = $pageRenderer ?: GeneralUtility::makeInstance(PageRenderer::class);
-        $this->resourceFactory = $resourceFactory ?: GeneralUtility::makeInstance(ResourceFactory::class);
-        $this->backendUserAuthentication = $backendUserAuthentication ?: $GLOBALS['BE_USER'];
-        $this->formProtection = $formProtection ?: FormProtectionFactory::get();
+        $this->config = $config ?? new ExtensionConfig();
+        $this->iconFactory = $iconFactory ?? GeneralUtility::makeInstance(IconFactory::class);
+        $this->languageService = $languageService ?? $GLOBALS['LANG'];
+        $this->uriBuilder = $uriBuilder ?? GeneralUtility::makeInstance(UriBuilder::class);
+        $this->pageRenderer = $pageRenderer ?? GeneralUtility::makeInstance(PageRenderer::class);
+        $this->resourceFactory = $resourceFactory ?? GeneralUtility::makeInstance(ResourceFactory::class);
+        $this->backendUserAuthentication = $backendUserAuthentication ?? $GLOBALS['BE_USER'];
+        $this->formProtection = $formProtection ?? FormProtectionFactory::get();
     }
 
-    public function getButtons(array $params, ButtonBar $buttonBar)
+    /**
+     * @param array{buttons: array<string, mixed>} $params
+     * @return array<string, mixed>
+     * @throws \JsonException
+     * @throws RouteNotFoundException
+     */
+    public function getButtons(array $params, ButtonBar $buttonBar): array
     {
         $buttons = $params['buttons'];
         // Only add the button to file list module
@@ -126,9 +116,10 @@ class FileListButtonHook
                             'callbackurl' => $this->getCallBackUrl(),
                             'existing_files' => $this->getExistingFiles(),
                             'extensions' => $this->getAllowedFileExtensions(),
-                        ])),
+                        ], JSON_THROW_ON_ERROR)),
                         'window' => $this->getWindowSize(),
-                    ]
+                    ],
+                    JSON_THROW_ON_ERROR
                 ),
             ]
         );
@@ -138,15 +129,16 @@ class FileListButtonHook
         return $buttons;
     }
 
-    private function getTargetUrl()
+    private function getTargetUrl(): string
     {
         // Encoding galore
-        $serverUrl = rtrim($this->config->get('serverUrl'), '/');
+        $serverUrl = rtrim((string)$this->config->get('serverUrl'), '/');
         $parsedUrl = parse_url($serverUrl);
         $filePickerArgument = \rawurlencode(\base64_encode(\json_encode(
             [
                 'callbackurl' => $this->getCallBackUrl(),
-            ]
+            ],
+            JSON_THROW_ON_ERROR
         )));
 
         return sprintf(
@@ -158,16 +150,15 @@ class FileListButtonHook
 
     /**
      * @throws \InvalidArgumentException
-     * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
-     * @return string
+     * @throws RouteNotFoundException
      */
-    private function getCallBackUrl()
+    private function getCallBackUrl(): string
     {
         $uriArguments = [
-            'id' => isset($_GET['id']) ? $_GET['id'] : $this->getRootLevelFolder(),
+            'id' => $_GET['id'] ?? $this->getRootLevelFolder(),
             'importToken' => $this->formProtection->generateToken('easydb', 'fileImport'),
         ];
-        if ($this->config->get('transferSession')) {
+        if ($this->config->get('transferSession') === true) {
             $uriArguments['easydb_ses_id'] = $this->generateSessionId();
         }
 
@@ -178,34 +169,38 @@ class FileListButtonHook
         );
     }
 
-    private function generateSessionId()
+    private function generateSessionId(): string
     {
         $typo3SessionId = !empty($GLOBALS['BE_USER']->id) ? $GLOBALS['BE_USER']->id : '';
 
         return (new Session())->fetchEasyDbSessionByTypo3Session($typo3SessionId);
     }
 
-    private function getExistingFiles()
+    /**
+     * @return array{uid: string}[]
+     */
+    private function getExistingFiles(): array
     {
-        $folderId = isset($_GET['id']) ? $_GET['id'] : $this->getRootLevelFolder();
+        $folderId = $_GET['id'] ?? $this->getRootLevelFolder();
 
         return (new FileUpdater($this->resourceFactory->getFolderObjectFromCombinedIdentifier($folderId)))->getFilesMap();
     }
 
     /**
-     * @return array
+     * @return string[]
      */
-    private function getAllowedFileExtensions()
+    private function getAllowedFileExtensions(): array
     {
-        return GeneralUtility::trimExplode(',', $this->config->get('allowedFileExtensions'));
+        return GeneralUtility::trimExplode(',', (string)$this->config->get('allowedFileExtensions'));
     }
 
     /**
-     * @return array
+     * @return array{height: int, width: int}
      */
-    private function getWindowSize()
+    private function getWindowSize(): array
     {
-        if (empty($this->backendUserAuthentication->uc['easydb'])) {
+        if (!isset($this->backendUserAuthentication->uc['easydb'])) {
+            assert(is_array($this->backendUserAuthentication->uc));
             $this->backendUserAuthentication->uc['easydb'] = $GLOBALS['TYPO3_CONF_VARS']['BE']['defaultUC']['easydb'];
             $this->backendUserAuthentication->writeUC();
         }
@@ -220,7 +215,7 @@ class FileListButtonHook
         // Take the first object of the first storage
         $fileStorages = $this->backendUserAuthentication->getFileStorages();
         $fileStorage = current($fileStorages);
-        if ($fileStorage) {
+        if ($fileStorage instanceof ResourceStorage) {
             return $fileStorage->getUid() . ':' . $fileStorage->getRootLevelFolder()->getIdentifier();
         }
         throw new \RuntimeException('Could not find any folder to be displayed.', 1498569603);
@@ -234,8 +229,6 @@ class FileListButtonHook
      */
     private function isFileListModuleUri(): bool
     {
-        return (isset($_GET['M']) && $_GET['M'] === 'file_FilelistList')
-            || (isset($_GET['route']) && $_GET['route'] === '/file/FilelistList/')
-            || (isset($_GET['route']) && $_GET['route'] === '/module/file/FilelistList');
+        return ($_GET['route'] ?? '') === '/module/file/FilelistList';
     }
 }

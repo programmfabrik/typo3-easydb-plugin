@@ -22,48 +22,40 @@ namespace Easydb\Typo3Integration\Persistence;
  ***************************************************************/
 
 use Easydb\Typo3Integration\ExtensionConfig;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\DatabaseConnection;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class SystemLanguages
 {
-    /**
-     * @var ExtensionConfig
-     */
-    private $config;
+    private ExtensionConfig $config;
 
     public function __construct(ExtensionConfig $config = null)
     {
-        $this->config = $config ?: new ExtensionConfig();
+        $this->config = $config ?? new ExtensionConfig();
     }
 
-    public function getLocaleIdMapping()
+    /**
+     * @return array<string, int>
+     */
+    public function getLocaleIdMapping(): array
     {
-        if (class_exists(ConnectionPool::class)) {
-            $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_language');
-            $languageRecords = $queryBuilder
-                ->select('uid', 'easydb_locale')
-                ->from('sys_language')
-                ->orderBy('sorting')
-                ->execute()
-                ->fetchAll();
-        } else {
-            /** @var DatabaseConnection $db */
-            $db = $GLOBALS['TYPO3_DB'];
-            $languageRecords = $db->exec_SELECTgetRows('uid,easydb_locale', 'sys_language', '1=1' . BackendUtility::deleteClause('sys_language') . BackendUtility::BEenableFields('sys_language'));
-        }
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_language');
+        $languageRecords = $queryBuilder
+            ->select('uid', 'easydb_locale')
+            ->from('sys_language')
+            ->orderBy('sorting')
+            ->executeQuery()
+            ->fetchAllAssociative();
         $languagesByIsoCode = [];
         foreach ($languageRecords as $languageRecord) {
-            $languagesByIsoCode[$languageRecord['easydb_locale']] = $languageRecord['uid'];
+            $languagesByIsoCode[(string)$languageRecord['easydb_locale']] = (int)$languageRecord['uid'];
         }
 
         return $languagesByIsoCode;
     }
 
-    public function getDefaultLanguageLocale()
+    public function getDefaultLanguageLocale(): string
     {
-        return $this->config->get('defaultLocale');
+        return (string)$this->config->get('defaultLocale');
     }
 }

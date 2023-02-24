@@ -1,25 +1,7 @@
 <?php
-namespace Easydb\Typo3Integration;
+declare(strict_types=1);
 
-/***************************************************************
- *  Copyright notice
- *
- *  (c) 2017 Helmut Hummel <info@helhum.io>
- *  All rights reserved
- *
- *  The GNU General Public License can be found at
- *  http://www.gnu.org/copyleft/gpl.html.
- *  A copy is found in the text file GPL.txt and important notices to the license
- *  from the author is found in LICENSE.txt distributed with these scripts.
- *
- *
- *  This script is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  This copyright notice MUST APPEAR in all copies of the script!
- ***************************************************************/
+namespace Easydb\Typo3Integration;
 
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Http\UploadedFile;
@@ -28,40 +10,38 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class EasydbRequest
 {
     /**
-     * @var array
+     * @var array<int, array<string, mixed>>
      */
-    private $files;
+    private array $files;
 
     /**
-     * @var array
+     * @var array{height: int, width: int}
      */
-    private $windowSize;
+    private array $windowSize;
 
     /**
      * Validate and request and return normalized object
      *
-     * @param ServerRequestInterface $serverRequest
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
-     * @return self
      */
-    public static function fromServerRequest(ServerRequestInterface $serverRequest)
+    public static function fromServerRequest(ServerRequestInterface $serverRequest): self
     {
         if (!isset($serverRequest->getParsedBody()['body'])) {
             throw new \InvalidArgumentException('Invalid easydb request', 1498561326);
         }
-        $parsedBody = \json_decode($serverRequest->getParsedBody()['body'], true);
+        $parsedBody = \json_decode($serverRequest->getParsedBody()['body'], true, 512, JSON_THROW_ON_ERROR);
         if (empty($parsedBody['files']) || !is_array($parsedBody['files'])) {
             throw new \InvalidArgumentException('Invalid easydb request (empty files)', 1498561365);
         }
-        $files = (array)$parsedBody['files'];
+        $files = $parsedBody['files'];
         if (!empty($parsedBody['send_data']) && empty($serverRequest->getUploadedFiles()['files'])) {
             throw new \InvalidArgumentException('Invalid easydb request (empty file data)', 1498561655);
         }
-        $uploadedFiles = $parsedBody['send_data'] ? (array)$serverRequest->getUploadedFiles()['files'] : [];
+        $uploadedFiles = !empty($parsedBody['send_data']) ? (array)$serverRequest->getUploadedFiles()['files'] : [];
         foreach ($files as &$fileData) {
             $localFilePath = GeneralUtility::tempnam('easydb_');
-            if ($parsedBody['send_data']) {
+            if (!empty($parsedBody['send_data'])) {
                 /** @var UploadedFile $uploadedFile */
                 foreach ($uploadedFiles as $uploadedFile) {
                     if ($uploadedFile->getClientFilename() !== $fileData['filename']) {
@@ -79,7 +59,7 @@ class EasydbRequest
                 }
             } else {
                 $fileContent = GeneralUtility::getUrl($fileData['url']);
-                if ($fileContent) {
+                if (is_string($fileContent) && $fileContent !== '') {
                     file_put_contents($localFilePath, $fileContent);
                 } else {
                     $fileData['error'] = [
@@ -97,18 +77,28 @@ class EasydbRequest
         return new self($files, $parsedBody['window_preferences']);
     }
 
+    /**
+     * @param array<int, array<string, mixed>> $files
+     * @param array{height: int, width: int} $windowSize
+     */
     private function __construct(array $files, array $windowSize)
     {
         $this->files = $files;
         $this->windowSize = $windowSize;
     }
 
-    public function getWindowSize()
+    /**
+     * @return array{height: int, width: int}
+     */
+    public function getWindowSize(): array
     {
         return $this->windowSize;
     }
 
-    public function getFiles()
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function getFiles(): array
     {
         return $this->files;
     }

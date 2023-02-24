@@ -9,7 +9,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class Session
 {
-    public function hasTypo3SessionForEasyDbSession($easyDbSessionId)
+    public function hasTypo3SessionForEasyDbSession(string $easyDbSessionId): bool
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('be_sessions');
 
@@ -20,7 +20,7 @@ class Session
         ) === 1;
     }
 
-    public function fetchEasyDbSessionByTypo3Session($typo3SessionId)
+    public function fetchEasyDbSessionByTypo3Session(string $typo3SessionId): string
     {
         if (empty($typo3SessionId)) {
             throw new \UnexpectedValueException('TYPO3 Session is expected to exist', 1603378462);
@@ -31,7 +31,7 @@ class Session
             ['easydb_ses_id'],
             'be_sessions',
             ['ses_id' => $this->hashSessionId($typo3SessionId)]
-        )->fetchColumn();
+        )->fetchOne();
 
         if (empty($easyDbSessionId)) {
             $easyDbSessionId = $this->generateEasyDbSessionId();
@@ -40,7 +40,7 @@ class Session
         return $easyDbSessionId;
     }
 
-    public function fetchTypo3SessionByEasyDbSession($easyDbSessionId)
+    public function fetchTypo3SessionByEasyDbSession(string $easyDbSessionId): string
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('be_sessions');
 
@@ -48,10 +48,10 @@ class Session
             ['cookie_value'],
             'be_sessions',
             ['easydb_ses_id' => $easyDbSessionId]
-        )->fetchColumn();
+        )->fetchOne();
     }
 
-    private function generateEasyDbSessionId()
+    private function generateEasyDbSessionId(): string
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('be_sessions');
         $sessionId = (new Random())->generateRandomHexString(32);
@@ -70,7 +70,7 @@ class Session
         return $sessionId;
     }
 
-    private function hashSessionId($sessionId)
+    private function hashSessionId(string $sessionId): string
     {
         $backend = GeneralUtility::makeInstance(SessionManager::class)->getSessionBackend('BE');
         if ($backend instanceof HashableSessionBackendInterface) {

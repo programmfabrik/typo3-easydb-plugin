@@ -1,25 +1,7 @@
 <?php
-namespace Easydb\Typo3Integration\Controller;
+declare(strict_types=1);
 
-/***************************************************************
- *  Copyright notice
- *
- *  (c) 2017 Helmut Hummel <info@helhum.io>
- *  All rights reserved
- *
- *  The GNU General Public License can be found at
- *  http://www.gnu.org/copyleft/gpl.html.
- *  A copy is found in the text file GPL.txt and important notices to the license
- *  from the author is found in LICENSE.txt distributed with these scripts.
- *
- *
- *  This script is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  This copyright notice MUST APPEAR in all copies of the script!
- ***************************************************************/
+namespace Easydb\Typo3Integration\Controller;
 
 use Easydb\Typo3Integration\EasydbRequest;
 use Easydb\Typo3Integration\Resource\FileUpdater;
@@ -39,25 +21,17 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class ImportFilesController
 {
-    /**
-     * @var ResourceFactory
-     */
-    private $resourceFactory;
-    /**
-     * @var FlashMessageQueue
-     */
-    private $messageQueue;
+    private ResourceFactory $resourceFactory;
 
-    /**
-     * @var BackendUserAuthentication
-     */
-    private $backendUserAuthentication;
+    private FlashMessageQueue $messageQueue;
+
+    private BackendUserAuthentication $backendUserAuthentication;
 
     public function __construct(ResourceFactory $resourceFactory = null, FlashMessageQueue $messageQueue = null, BackendUserAuthentication $backendUserAuthentication = null)
     {
-        $this->resourceFactory = $resourceFactory ?: GeneralUtility::makeInstance(ResourceFactory::class);
-        $this->messageQueue = $messageQueue ?: GeneralUtility::makeInstance(FlashMessageService::class)->getMessageQueueByIdentifier();
-        $this->backendUserAuthentication = $backendUserAuthentication ?: $GLOBALS['BE_USER'];
+        $this->resourceFactory = $resourceFactory ?? GeneralUtility::makeInstance(ResourceFactory::class);
+        $this->messageQueue = $messageQueue ?? GeneralUtility::makeInstance(FlashMessageService::class)->getMessageQueueByIdentifier();
+        $this->backendUserAuthentication = $backendUserAuthentication ?? $GLOBALS['BE_USER'];
     }
 
     public function importAction(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
@@ -118,12 +92,15 @@ class ImportFilesController
             'files' => $addedFiles,
             'took' => round(microtime(true) * 1000) - $importStart,
         ];
-        $response->getBody()->write(json_encode($easyDBResponse));
+        $response->getBody()->write(json_encode($easyDBResponse, JSON_THROW_ON_ERROR));
 
         return $response;
     }
 
-    private function addFlashMessage($message, array $arguments = []): void
+    /**
+     * @param string[] $arguments
+     */
+    private function addFlashMessage(string $message, array $arguments = []): void
     {
         $languagePrefix = 'LLL:EXT:easydb/Resources/Private/Language/locallang.xlf:action.';
         $languageTitleSuffix = '.title';
@@ -137,7 +114,10 @@ class ImportFilesController
         );
     }
 
-    private function translate($label, array $arguments = []): string
+    /**
+     * @param string[] $arguments
+     */
+    private function translate(string $label, array $arguments = []): string
     {
         if (empty($arguments)) {
             return $GLOBALS['LANG']->sL($label);

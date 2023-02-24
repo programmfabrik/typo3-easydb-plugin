@@ -1,30 +1,10 @@
 <?php
+declare(strict_types=1);
 namespace Easydb\Typo3Integration\Resource;
-
-/***************************************************************
- *  Copyright notice
- *
- *  (c) 2017 Helmut Hummel <info@helhum.io>
- *  All rights reserved
- *
- *  The GNU General Public License can be found at
- *  http://www.gnu.org/copyleft/gpl.html.
- *  A copy is found in the text file GPL.txt and important notices to the license
- *  from the author is found in LICENSE.txt distributed with these scripts.
- *
- *
- *  This script is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  This copyright notice MUST APPEAR in all copies of the script!
- ***************************************************************/
 
 use Easydb\Typo3Integration\ExtensionConfig;
 use Easydb\Typo3Integration\Persistence\MetaDataProcessor;
 use Easydb\Typo3Integration\Persistence\SystemLanguages;
-use TYPO3\CMS\Backend\Configuration\TranslationConfigurationProvider;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\RelationHandler;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
@@ -35,7 +15,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class FileUpdater
 {
-    private static $filePropertiesToImportMapping = [
+    private const filePropertiesToImportMapping = [
         'uid' => 'easydb_uid',
         'asset_id' => 'easydb_asset_id',
         'asset_version' => 'easydb_asset_version',
@@ -46,64 +26,64 @@ class FileUpdater
         'uuid' => 'easydb_uuid',
     ];
 
-    /**
-     * @var Folder
-     */
-    private $targetFolder;
+    private Folder $targetFolder;
+
+    private DataHandler $dataHandler;
+
+    private RelationHandler $relationHandler;
 
     /**
-     * @var DataHandler
+     * @var array<string, File>
      */
-    private $dataHandler;
+    private array $files = [];
 
     /**
-     * @var RelationHandler
+     * @var array{uid: string}[]
      */
-    private $relationHandler;
-
-    /**
-     * @var File[]
-     */
-    private $files = [];
-
-    /**
-     * @var array
-     */
-    private $filesMap = [];
+    private array $filesMap = [];
 
     public function __construct(
         Folder $targetFolder,
         DataHandler $dataHandler = null,
         RelationHandler $relationHandler = null,
-        TranslationConfigurationProvider $translationConfigurationProvider = null
     ) {
         $this->targetFolder = $targetFolder;
         $this->fetchFiles();
-        $this->dataHandler = $dataHandler ?: GeneralUtility::makeInstance(DataHandler::class);
-        $this->relationHandler = $relationHandler ?: GeneralUtility::makeInstance(RelationHandler::class);
+        $this->dataHandler = $dataHandler ?? GeneralUtility::makeInstance(DataHandler::class);
+        $this->relationHandler = $relationHandler ?? GeneralUtility::makeInstance(RelationHandler::class);
     }
 
-    public function hasFile($uid)
+    public function hasFile(string $uid): bool
     {
         return isset($this->files[$uid]);
     }
 
-    private function getFile($uid)
+    private function getFile(string $uid): File
     {
         return $this->files[$uid];
     }
 
-    public function getFiles()
+    /**
+     * @return File[]
+     */
+    public function getFiles(): array
     {
         return $this->files;
     }
 
-    public function getFilesMap()
+    /**
+     * @return array{uid: string}[]
+     */
+    public function getFilesMap(): array
     {
         return $this->filesMap;
     }
 
-    public function addOrUpdateFile(array $fileData)
+    /**
+     * @param array<string, mixed> $fileData
+     * @return array<string, int|string>
+     */
+    public function addOrUpdateFile(array $fileData): array
     {
         $action = 'insert';
         if ($this->hasFile($fileData['uid'])) {
@@ -119,24 +99,28 @@ class FileUpdater
 
         return [
             'uid' => $fileData['uid'],
-            'url' => GeneralUtility::locationHeaderUrl($uploadedFile->getPublicUrl()),
+            'url' => GeneralUtility::locationHeaderUrl((string)$uploadedFile->getPublicUrl()),
             'resourceid' => $uploadedFile->getUid(),
             'status' => 'done',
             'action_taken' => $action,
         ];
     }
 
-    private function fetchFiles()
+    private function fetchFiles(): void
     {
         foreach ($this->targetFolder->getFiles() as $file) {
-            if ($easydbUid = $file->getProperty('easydb_uid')) {
+            if (is_string($easydbUid = $file->getProperty('easydb_uid')) && $easydbUid !== '') {
                 $this->files[$easydbUid] = $file;
                 $this->filesMap[] = ['uid' => $easydbUid];
             }
         }
     }
 
-    private function addOrUpdateMetaData(File $file, array $fileData)
+    /**
+     * @param File $file
+     * @param array<string, mixed> $fileData
+     */
+    private function addOrUpdateMetaData(File $file, array $fileData): void
     {
         $metaDataProcessor = new MetaDataProcessor(
             $this->getExistingMetaDataRecords($file),
@@ -148,17 +132,21 @@ class FileUpdater
                 'sys_file' => [
                     $file->getUid() => $this->getFileFieldsFromFileData($fileData),
                 ],
-                'sys_file_metadata' => $metaDataProcessor->mapEsaydbMetaDataToMetaDataRecords($fileData),
+                'sys_file_metadata' => $metaDataProcessor->mapEasydbMetaDataToMetaDataRecords($fileData),
             ],
             []
         );
         $this->dataHandler->process_datamap();
     }
 
-    private function getFileFieldsFromFileData(array $fileData)
+    /**
+     * @param array<string, mixed> $fileData
+     * @return array<string, mixed>
+     */
+    private function getFileFieldsFromFileData(array $fileData): array
     {
         $fields = [];
-        foreach (self::$filePropertiesToImportMapping as $easydbName => $typo3Name) {
+        foreach (self::filePropertiesToImportMapping as $easydbName => $typo3Name) {
             if (isset($fileData[$easydbName])) {
                 $fields[$typo3Name] = $fileData[$easydbName];
             }
@@ -167,10 +155,14 @@ class FileUpdater
         return $fields;
     }
 
-    private function getExistingMetaDataRecords(File $file)
+    /**
+     * @param File $file
+     * @return array<int, array<string, scalar>>
+     */
+    private function getExistingMetaDataRecords(File $file): array
     {
         $this->relationHandler->start(
-            $file->getUid(),
+            (string)$file->getUid(),
             'sys_file_metadata',
             '',
             $file->getUid(),
@@ -180,7 +172,10 @@ class FileUpdater
         $existingMetaDataRecords = [];
         foreach ($this->relationHandler->getValueArray() as $metaDataUid) {
             $row = BackendUtility::getRecord('sys_file_metadata', $metaDataUid);
-            $existingMetaDataRecords[$row['sys_language_uid']] = $row;
+            if (!is_array($row)) {
+                continue;
+            }
+            $existingMetaDataRecords[(int)($row['sys_language_uid'] ?? 0)] = $row;
         }
         return $existingMetaDataRecords;
     }

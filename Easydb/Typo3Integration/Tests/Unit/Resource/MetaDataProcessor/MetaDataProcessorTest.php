@@ -130,7 +130,7 @@ class MetaDataProcessorTest extends \PHPUnit_Framework_TestCase
      * @test
      * @dataProvider mapsMetaDataCorrectlyDataProvider
      */
-    public function mapsMetaDataCorrectly(array $locales, array $metaData, array $payload, array $expected)
+    public function mapsMetaDataCorrectly(array $locales, array $metaData, array $payload, array $expected): void
     {
         $systemLanguagesProphecy = $this->prophesize(SystemLanguages::class);
         $systemLanguagesProphecy->getLocaleIdMapping()->willReturn($locales);
@@ -142,7 +142,7 @@ class MetaDataProcessorTest extends \PHPUnit_Framework_TestCase
             $systemLanguagesProphecy->reveal()
         );
 
-        $result = $subject->mapEsaydbMetaDataToMetaDataRecords($payload);
+        $result = $subject->mapEasydbMetaDataToMetaDataRecords($payload);
         $this->assertSame($expected, $result);
     }
 
@@ -187,7 +187,7 @@ class MetaDataProcessorTest extends \PHPUnit_Framework_TestCase
             ],
         ];
 
-        $result = $subject->mapEsaydbMetaDataToMetaDataRecords(
+        $result = $subject->mapEasydbMetaDataToMetaDataRecords(
             [
                 'title' => [
                     'en-US' => 'A title',

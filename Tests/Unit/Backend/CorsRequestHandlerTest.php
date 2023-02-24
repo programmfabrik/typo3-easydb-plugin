@@ -32,17 +32,17 @@ class CorsRequestHandlerTest extends UnitTestCase
     /**
      * @test
      */
-    public function cannotHandleRequestWhenNoOriginHeaderIsSet()
+    public function cannotHandleRequestWhenNoOriginHeaderIsSet(): void
     {
         $subject = new CorsRequestHandler(new ExtensionConfig(['serverUrl' => 'http://localhost']));
         $request = new ServerRequest();
-        $this->assertFalse($subject->canHandleRequest($request));
+        self::assertFalse($subject->canHandleRequest($request));
     }
 
     /**
      * @test
      */
-    public function canHandleRequestWhenOriginHeaderIsSet()
+    public function canHandleRequestWhenOriginHeaderIsSet(): void
     {
         $subject = new CorsRequestHandler(new ExtensionConfig(['serverUrl' => 'http://localhost']));
         $request = new ServerRequest(
@@ -53,61 +53,61 @@ class CorsRequestHandlerTest extends UnitTestCase
                 'origin' => 'http://localhost',
             ]
         );
-        $this->assertTrue($subject->canHandleRequest($request));
+        self::assertTrue($subject->canHandleRequest($request));
     }
 
     /**
      * @test
      */
-    public function returnsUnmodifiedResponseWithInvalidRequest()
+    public function returnsUnmodifiedResponseWithInvalidRequest(): void
     {
         $subject = new CorsRequestHandler(new ExtensionConfig(['serverUrl' => 'http://localhost']));
         $request = new ServerRequest();
         $response = new Response();
 
-        $this->assertSame($response, $subject->handleRequest($request, $response));
+        self::assertSame($response, $subject->handleRequest($request, $response));
     }
 
     /**
      * @test
      */
-    public function returnsUnmodifiedResponseWithInvalidOptionsRequest()
+    public function returnsUnmodifiedResponseWithInvalidOptionsRequest(): void
     {
         $subject = new CorsRequestHandler(new ExtensionConfig(['serverUrl' => 'http://localhost']));
         $request = new ServerRequest(null, 'OPTIONS');
         $response = new Response();
 
-        $this->assertSame($response, $subject->handleRequest($request, $response));
+        self::assertSame($response, $subject->handleRequest($request, $response));
     }
 
     /**
      * @test
      */
-    public function returnsUnmodifiedResponseWithInvalidMethodRequest()
+    public function returnsUnmodifiedResponseWithInvalidMethodRequest(): void
     {
         $subject = new CorsRequestHandler(new ExtensionConfig(['serverUrl' => 'http://localhost']));
         $request = new ServerRequest(null, 'GET');
         $response = new Response();
 
-        $this->assertSame($response, $subject->handleRequest($request, $response));
+        self::assertSame($response, $subject->handleRequest($request, $response));
     }
 
     /**
      * @test
      */
-    public function returnsUnmodifiedResponseWithInvalidPostRequest()
+    public function returnsUnmodifiedResponseWithInvalidPostRequest(): void
     {
         $subject = new CorsRequestHandler(new ExtensionConfig(['serverUrl' => 'http://localhost']));
         $request = new ServerRequest(null, 'POST');
         $response = new Response();
 
-        $this->assertSame($response, $subject->handleRequest($request, $response));
+        self::assertSame($response, $subject->handleRequest($request, $response));
     }
 
     /**
      * @test
      */
-    public function returnsResponseWithCorsHeadersWithValidOptionsRequest()
+    public function returnsResponseWithCorsHeadersWithValidOptionsRequest(): void
     {
         $subject = new CorsRequestHandler(new ExtensionConfig(['serverUrl' => 'http://localhost']));
         $request = new ServerRequest(
@@ -121,15 +121,15 @@ class CorsRequestHandlerTest extends UnitTestCase
         );
         $response = new Response();
         $actualResponse = $subject->handleRequest($request, $response);
-        $this->assertNotSame($response, $actualResponse);
-        $this->assertTrue($actualResponse->hasHeader('Access-Control-Allow-Origin'));
-        $this->assertSame('http://localhost', $actualResponse->getHeader('Access-Control-Allow-Origin')[0]);
+        self::assertNotSame($response, $actualResponse);
+        self::assertTrue($actualResponse->hasHeader('Access-Control-Allow-Origin'));
+        self::assertSame('http://localhost', $actualResponse->getHeader('Access-Control-Allow-Origin')[0]);
     }
 
     /**
      * @test
      */
-    public function returnsResponseWithCorsHeadersWithValidPostRequest()
+    public function returnsResponseWithCorsHeadersWithValidPostRequest(): void
     {
         $subject = new CorsRequestHandler(new ExtensionConfig(['serverUrl' => 'http://localhost']));
         $request = new ServerRequest(
@@ -142,8 +142,8 @@ class CorsRequestHandlerTest extends UnitTestCase
         );
         $response = new Response();
         $actualResponse = $subject->handleRequest($request, $response);
-        $this->assertNotSame($response, $actualResponse);
-        $this->assertTrue($actualResponse->hasHeader('Access-Control-Allow-Origin'));
-        $this->assertSame('http://localhost', $actualResponse->getHeader('Access-Control-Allow-Origin')[0]);
+        self::assertNotSame($response, $actualResponse);
+        self::assertTrue($actualResponse->hasHeader('Access-Control-Allow-Origin'));
+        self::assertSame('http://localhost', $actualResponse->getHeader('Access-Control-Allow-Origin')[0]);
     }
 }

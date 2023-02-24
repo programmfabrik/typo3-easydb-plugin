@@ -1,25 +1,7 @@
 <?php
-namespace Easydb\Typo3Integration\Backend;
+declare(strict_types=1);
 
-/***************************************************************
- *  Copyright notice
- *
- *  (c) 2017 Helmut Hummel <info@helhum.io>
- *  All rights reserved
- *
- *  The GNU General Public License can be found at
- *  http://www.gnu.org/copyleft/gpl.html.
- *  A copy is found in the text file GPL.txt and important notices to the license
- *  from the author is found in LICENSE.txt distributed with these scripts.
- *
- *
- *  This script is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  This copyright notice MUST APPEAR in all copies of the script!
- ***************************************************************/
+namespace Easydb\Typo3Integration\Backend;
 
 use Easydb\Typo3Integration\Controller\ImportFilesController;
 use Psr\Http\Message\ResponseInterface;
@@ -55,16 +37,16 @@ class DefaultRequestHandler implements RequestHandlerInterface
         AbstractFormProtection $formProtection = null,
         ImportFilesController $importFilesController = null
     ) {
-        $this->userAuthentication = $userAuthentication ?: $GLOBALS['BE_USER'];
-        $this->formProtection = $formProtection ?: FormProtectionFactory::get('backend');
-        $this->importFilesController = $importFilesController ?: GeneralUtility::makeInstance(ImportFilesController::class);
+        $this->userAuthentication = $userAuthentication ?? $GLOBALS['BE_USER'];
+        $this->formProtection = $formProtection ?? FormProtectionFactory::get('backend');
+        $this->importFilesController = $importFilesController ?? GeneralUtility::makeInstance(ImportFilesController::class);
     }
 
     /**
      * @param ServerRequestInterface $request
      * @return bool
      */
-    public function canHandleRequest(ServerRequestInterface $request)
+    public function canHandleRequest(ServerRequestInterface $request): bool
     {
         return !empty($this->userAuthentication->user['uid'])
             && $this->formProtection->validateToken(
@@ -75,7 +57,7 @@ class DefaultRequestHandler implements RequestHandlerInterface
             && $request->getMethod() !== 'OPTIONS';
     }
 
-    public function getPriority()
+    public function getPriority(): int
     {
         return 50;
     }
@@ -85,7 +67,7 @@ class DefaultRequestHandler implements RequestHandlerInterface
      * @param ResponseInterface $response
      * @return ResponseInterface
      */
-    public function handleRequest(ServerRequestInterface $request, ResponseInterface $response)
+    public function handleRequest(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         if (!$this->canHandleRequest($request)) {
             return $response;

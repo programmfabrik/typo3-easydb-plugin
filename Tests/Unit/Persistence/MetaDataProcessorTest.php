@@ -27,7 +27,10 @@ use TYPO3\CMS\Core\DataHandling\DataHandler;
 
 class MetaDataProcessorTest extends UnitTestCase
 {
-    public function normalizeSentMetaDataValueNormalizesAllValuesDataProvider()
+    /**
+     * @return array<string, mixed[]>
+     */
+    public function normalizeSentMetaDataValueNormalizesAllValuesDataProvider(): array
     {
         return [
             'no locales' => [
@@ -67,13 +70,13 @@ class MetaDataProcessorTest extends UnitTestCase
      * @param mixed $inputValue
      * @param mixed $expectedValue
      */
-    public function normalizeSentMetaDataValueNormalizesAllValues($inputValue, $expectedValue)
+    public function normalizeSentMetaDataValueNormalizesAllValues($inputValue, $expectedValue): void
     {
         $dataHandlerStub = $this->getMockBuilder(DataHandler::class)->disableOriginalConstructor()->getMock();
         $systemLanguagesStub = $this->getMockBuilder(SystemLanguages::class)->disableOriginalConstructor()->getMock();
 
         $metaDataProcessor = new MetaDataProcessor([], $dataHandlerStub, $systemLanguagesStub);
 
-        $this->assertSame($expectedValue, $metaDataProcessor->normalizeSentMetaDataValue($inputValue, 'en-US'));
+        self::assertSame($expectedValue, $metaDataProcessor->normalizeSentMetaDataValue($inputValue, 'en-US'));
     }
 }

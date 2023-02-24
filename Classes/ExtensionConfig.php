@@ -1,48 +1,36 @@
 <?php
+declare(strict_types=1);
+
 namespace Easydb\Typo3Integration;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-/***************************************************************
- *  Copyright notice
- *
- *  (c) 2017 Helmut Hummel <info@helhum.io>
- *  All rights reserved
- *
- *  The GNU General Public License can be found at
- *  http://www.gnu.org/copyleft/gpl.html.
- *  A copy is found in the text file GPL.txt and important notices to the license
- *  from the author is found in LICENSE.txt distributed with these scripts.
- *
- *
- *  This script is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  This copyright notice MUST APPEAR in all copies of the script!
- ***************************************************************/
-
 class ExtensionConfig
 {
-    private static $extensionKey = 'easydb';
-    private static $defaults = [
+    private const extensionKey = 'easydb';
+    private const defaults = [
         'allowSessionTransfer' => false,
     ];
 
     /**
-     * @var array
+     * @var array<string, bool|string>
      */
-    private $config;
+    private array $config;
 
+    /**
+     * @param array{serverUrl?: string, allowedFileExtensions?: string, defaultLocale?: string, allowSessionTransfer?: bool, transferSession?: bool, serverHostName?: string, allowedOrigin?: string}|null $config
+     */
     public function __construct(array $config = null)
     {
-        $this->config = $config ?? $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][self::$extensionKey] ?? unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][self::$extensionKey]);
-        $this->config = array_replace(self::$defaults, $this->config);
+        $this->config = $config ?? $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][self::extensionKey] ?? [];
+        $this->config = array_replace(self::defaults, $this->config);
         $this->setDerivedConfigOptions();
     }
 
-    public function get($name)
+    /**
+     * @return bool|string
+     */
+    public function get(string $name)
     {
         if (!array_key_exists($name, $this->config)) {
             throw new \InvalidArgumentException(sprintf('Configuration option "%s" does not exist', $name), 1498463301);
@@ -50,24 +38,25 @@ class ExtensionConfig
         return $this->config[$name];
     }
 
-    private function setDerivedConfigOptions()
+    private function setDerivedConfigOptions(): void
     {
-        $parsedUrl = parse_url($this->config['serverUrl']);
-        $this->config['serverHostName'] = $parsedUrl['host'];
-        $this->config['allowedOrigin'] = $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
-        $this->config['transferSession'] = $this->needsSessionTransfer($parsedUrl['host']);
+        $parsedUrl = parse_url((string)$this->config['serverUrl']);
+        $this->config['serverHostName'] = $parsedUrl['host'] ?? '';
+        $this->config['allowedOrigin'] = ($parsedUrl['scheme'] ?? 'https') . '://' . $this->config['serverHostName'];
+        $this->config['transferSession'] = $this->needsSessionTransfer($this->config['serverHostName']);
     }
 
-    private function needsSessionTransfer($easyDbHostName)
+    private function needsSessionTransfer(string $easyDbHostName): bool
     {
         $sameSiteCookieOption = $GLOBALS['TYPO3_CONF_VARS']['BE']['cookieSameSite'] ?? 'lax';
-
-        return $this->config['allowSessionTransfer']
+        $typo3Host = GeneralUtility::getIndpEnv('TYPO3_HOST_ONLY');
+        assert(is_string($typo3Host));
+        return (bool)($this->config['allowSessionTransfer'])
             && $sameSiteCookieOption !== 'none'
-            && $this->siteName($easyDbHostName) !== $this->siteName(GeneralUtility::getIndpEnv('TYPO3_HOST_ONLY'));
+            && $this->siteName($easyDbHostName) !== $this->siteName($typo3Host);
     }
 
-    private function siteName($fullHost)
+    private function siteName(string $fullHost): string
     {
         return implode('.', array_slice(explode('.', $fullHost), -2));
     }
