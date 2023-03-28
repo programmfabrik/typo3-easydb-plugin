@@ -15,27 +15,10 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                typo3: [ '^10.4.0', '^9.5.0', '^8.7.0' ]
-                php: [ '7.4', '7.3', '7.2' ]
+                typo3: [ '^11.5.1' ]
+                php: [ '7.4', '8.0', '8.1', '8.2' ]
                 dependency-version: [ stable, lowest  ]
                 experimental: [ false ]
-                include:
-                    -   php: 7.1
-                        typo3: '^8.7.0'
-                        dependency-version: stable
-                        experimental: false
-                    -   php: 7.0
-                        typo3: '^8.7.0'
-                        dependency-version: stable
-                        experimental: false
-                    -   php: 7.1
-                        typo3: '^8.7.0'
-                        dependency-version: lowest
-                        experimental: false
-                    -   php: 7.0
-                        typo3: '^8.7.0'
-                        dependency-version: lowest
-                        experimental: false
 
         continue-on-error: ${{ matrix.experimental }}
 
@@ -83,7 +66,7 @@ jobs:
                     composer update --with typo3/cms-core="${{ matrix.typo3 }}" --prefer-${{ matrix.dependency-version }} --prefer-dist --no-interaction
 
             -   name: Lint
-                run: .Build/bin/parallel-lint --exclude .Build .
+                run: vendor/bin/parallel-lint --exclude vendor --exclude var --exclude public .
 
             -   name: Unit Tests
-                run: .Build/bin/phpunit -c .Build/vendor/nimut/testing-framework/res/Configuration/UnitTests.xml Tests/Unit/
+                run: vendor/bin/phpunit -c vendor/nimut/testing-framework/res/Configuration/UnitTests.xml Tests/Unit/

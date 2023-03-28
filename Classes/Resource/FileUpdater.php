@@ -45,7 +45,7 @@ class FileUpdater
     public function __construct(
         Folder $targetFolder,
         DataHandler $dataHandler = null,
-        RelationHandler $relationHandler = null,
+        RelationHandler $relationHandler = null
     ) {
         $this->targetFolder = $targetFolder;
         $this->fetchFiles();
