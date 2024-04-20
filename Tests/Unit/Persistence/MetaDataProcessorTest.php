@@ -22,15 +22,15 @@ namespace Easydb\Typo3Integration\Tests\Unit\Persistence;
 
 use Easydb\Typo3Integration\Persistence\MetaDataProcessor;
 use Easydb\Typo3Integration\Persistence\SystemLanguages;
-use Nimut\TestingFramework\TestCase\UnitTestCase;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 class MetaDataProcessorTest extends UnitTestCase
 {
     /**
      * @return array<string, mixed[]>
      */
-    public function normalizeSentMetaDataValueNormalizesAllValuesDataProvider(): array
+    public static function normalizeSentMetaDataValueNormalizesAllValuesDataProvider(): array
     {
         return [
             'no locales' => [

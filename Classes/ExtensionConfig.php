@@ -50,7 +50,6 @@ class ExtensionConfig
     {
         $sameSiteCookieOption = $GLOBALS['TYPO3_CONF_VARS']['BE']['cookieSameSite'] ?? 'lax';
         $typo3Host = GeneralUtility::getIndpEnv('TYPO3_HOST_ONLY');
-        assert(is_string($typo3Host));
         return (bool)($this->config['allowSessionTransfer'])
             && $sameSiteCookieOption !== 'none'
             && $this->siteName($easyDbHostName) !== $this->siteName($typo3Host);

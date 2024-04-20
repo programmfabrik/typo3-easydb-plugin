@@ -5,7 +5,6 @@ includes:
     - vendor/phpstan/phpstan-doctrine/rules.neon
     - vendor/phpstan/phpstan-strict-rules/rules.neon
     - vendor/saschaegerer/phpstan-typo3/extension.neon
-    - phpstan-baseline.neon
 parameters:
     tmpDir: ./var/phpstan
     level: 8

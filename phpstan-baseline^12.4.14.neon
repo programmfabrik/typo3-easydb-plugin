@@ -1,0 +1,16 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Casting to array something that's already array\\.$#"
+			count: 1
+			path: Classes/Controller/ImportFilesController.php
+
+		-
+			message: "#^Call to function assert\\(\\) with true will always evaluate to true\\.$#"
+			count: 1
+			path: Classes/Hook/FileListButtonHook.php
+
+		-
+			message: "#^Call to function is_array\\(\\) with array will always evaluate to true\\.$#"
+			count: 1
+			path: Classes/Hook/FileListButtonHook.php
