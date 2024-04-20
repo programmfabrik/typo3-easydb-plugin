@@ -72,7 +72,8 @@ class CorsMiddleware implements MiddlewareInterface
 
     private function isEasydbRequest(ServerRequestInterface $request): bool
     {
-        return ($request->getQueryParams()['route'] ?? null) === '/ajax/easydb/import'
+        $routePath = $request->getQueryParams()['route'] ?? $request->getUri()->getPath();
+        return str_ends_with($routePath, '/ajax/easydb/import')
             && $this->corsRequestHandler->canHandleRequest($request);
     }
 }
