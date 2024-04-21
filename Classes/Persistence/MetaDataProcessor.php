@@ -25,7 +25,7 @@ class MetaDataProcessor
     {
         $this->metaData = $metaData;
         $this->dataHandler = $dataHandler ?? GeneralUtility::makeInstance(DataHandler::class);
-        $this->languages = $languages ?? new SystemLanguages();
+        $this->languages = $languages ?? GeneralUtility::makeInstance(SystemLanguages::class);
     }
 
     /**
@@ -50,12 +50,8 @@ class MetaDataProcessor
                 $metaRecordUid = $defaultLanguageMetaUid;
                 $languageUid = 0;
                 if (isset($systemLanguages[$locale])) {
-                    $languageUid = $systemLanguages[$locale];
+                    $languageUid = $systemLanguages[$locale]->getLanguageId();
                     $metaRecordUid = $this->getMetaUidByLanguage($languageUid);
-                    if ($locale === $defaultLanguageLocale && $GLOBALS['BE_USER']->checkLanguageAccess(0)) {
-                        // Additionally expose to default language in case locale matches
-                        $metaDataUpdates[$defaultLanguageMetaUid][$fieldName] = $fieldValue;
-                    }
                 }
                 if ($GLOBALS['BE_USER']->checkLanguageAccess($languageUid)) {
                     $metaDataUpdates[$metaRecordUid][$fieldName] = $fieldValue;
@@ -129,7 +125,7 @@ class MetaDataProcessor
      */
     private function resetDataHandler(): void
     {
-        $cache = GeneralUtility::makeInstance(CacheManager::class)->getCache('cache_runtime');
+        $cache = GeneralUtility::makeInstance(CacheManager::class)->getCache('runtime');
         $nestedElementCalls = $cache->get('core-datahandler-nestedElementCalls-');
         unset($nestedElementCalls['localize']['sys_file_metadata'][$this->metaData[0]['uid']]);
         $cache->set('core-datahandler-nestedElementCalls-', $nestedElementCalls);

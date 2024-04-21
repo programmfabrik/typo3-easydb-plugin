@@ -21,41 +21,89 @@ namespace Easydb\Typo3Integration\Persistence;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use Easydb\Typo3Integration\ExtensionConfig;
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Localization\Locale;
+use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
+use TYPO3\CMS\Core\Site\SiteFinder;
 
 class SystemLanguages
 {
-    private ExtensionConfig $config;
+    /**
+     * @var array<non-empty-string, SiteLanguage>
+     */
+    private array $languagesByLocale;
+    private string $defaultLanguageLocale = 'en-US';
 
-    public function __construct(ExtensionConfig $config = null)
-    {
-        $this->config = $config ?? new ExtensionConfig();
+    public function __construct(
+        private readonly SiteFinder $siteFinder,
+    ) {
     }
 
     /**
-     * @return array<string, int>
+     * @return array<non-empty-string, SiteLanguage>
      */
     public function getLocaleIdMapping(): array
     {
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_language');
-        $languageRecords = $queryBuilder
-            ->select('uid', 'easydb_locale')
-            ->from('sys_language')
-            ->orderBy('sorting')
-            ->executeQuery()
-            ->fetchAllAssociative();
-        $languagesByIsoCode = [];
-        foreach ($languageRecords as $languageRecord) {
-            $languagesByIsoCode[(string)$languageRecord['easydb_locale']] = (int)$languageRecord['uid'];
+        if (isset($this->languagesByLocale)) {
+            return $this->languagesByLocale;
         }
-
-        return $languagesByIsoCode;
+        $backendUser = $GLOBALS['BE_USER'];
+        assert($backendUser instanceof BackendUserAuthentication);
+        $this->languagesByLocale = [];
+        foreach ($this->siteFinder->getAllSites() as $site) {
+            foreach ($site->getAvailableLanguages($backendUser) as $languageId => $language) {
+                if (!$language->isEnabled()) {
+                    continue;
+                }
+                $locale = $this->extractLocale($language);
+                if (isset($this->languagesByLocale[$locale]) && $this->languagesByLocale[$locale]->getLanguageId() !== $language->getLanguageId()) {
+                    throw new \LogicException(
+                        sprintf(
+                            'SiteLanguage with locale "%s" is configured multiple times using different language uids "%d" and "%d"',
+                            $locale,
+                            $this->languagesByLocale[$locale]->getLanguageId(),
+                            $languageId,
+                        ),
+                        1713694588,
+                    );
+                }
+                if ($languageId === 0) {
+                    $this->defaultLanguageLocale = $locale;
+                }
+                $this->languagesByLocale[$locale] = $language;
+            }
+        }
+        return $this->languagesByLocale;
     }
 
     public function getDefaultLanguageLocale(): string
     {
-        return (string)$this->config->get('defaultLocale');
+        if (!isset($this->languagesByLocale)) {
+            // Initialize languages
+            $this->getLocaleIdMapping();
+        }
+        return $this->defaultLanguageLocale;
+    }
+
+    /**
+     * @param SiteLanguage $language
+     * @return non-empty-string
+     */
+    private function extractLocale(SiteLanguage $language): string
+    {
+        $locale = (string)($language->toArray()['easydbLocale'] ?? $this->normalizeTypo3Locale($language));
+        if ($locale === '') {
+            throw new \LogicException(sprintf('Site Language %d has empty locale configured', $language->getLanguageId()), 1713697035);
+        }
+        return $locale;
+    }
+
+    private function normalizeTypo3Locale(SiteLanguage $language): string
+    {
+        $typo3Locale = $language->getLocale();
+        if ($typo3Locale instanceof Locale) {
+            return $typo3Locale->getName();
+        }
+        return (new Locale($typo3Locale))->getName();
     }
 }

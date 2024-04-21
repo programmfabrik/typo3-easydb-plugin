@@ -2,7 +2,6 @@
 declare(strict_types=1);
 namespace Easydb\Typo3Integration\Resource;
 
-use Easydb\Typo3Integration\ExtensionConfig;
 use Easydb\Typo3Integration\Persistence\MetaDataProcessor;
 use Easydb\Typo3Integration\Persistence\SystemLanguages;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -125,7 +124,7 @@ class FileUpdater
         $metaDataProcessor = new MetaDataProcessor(
             $this->getExistingMetaDataRecords($file),
             $this->dataHandler,
-            new SystemLanguages(new ExtensionConfig())
+            GeneralUtility::makeInstance(SystemLanguages::class)
         );
         $this->dataHandler->start(
             [

@@ -14,3 +14,13 @@ parameters:
 			message: "#^Call to function is_array\\(\\) with array will always evaluate to true\\.$#"
 			count: 1
 			path: Classes/Hook/FileListButtonHook.php
+
+		-
+			message: "#^Instanceof between TYPO3\\\\CMS\\\\Core\\\\Localization\\\\Locale and TYPO3\\\\CMS\\\\Core\\\\Localization\\\\Locale will always evaluate to true\\.$#"
+			count: 1
+			path: Classes/Persistence/SystemLanguages.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: Classes/Persistence/SystemLanguages.php
