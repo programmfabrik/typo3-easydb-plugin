@@ -50,11 +50,15 @@ class FileListButtonListener
         private readonly PageRenderer $pageRenderer,
         private readonly ResourceFactory $resourceFactory,
         LanguageServiceFactory $languageServiceFactory,
-        FormProtectionFactory $formProtectionFactory
+        // @todo: this can be injected, when compat to TYPO3 11 is removed
+        //        FormProtectionFactory $formProtectionFactory,
     ) {
         $this->backendUserAuthentication = $GLOBALS['BE_USER'];
         $this->languageService = $languageServiceFactory->createFromUserPreferences($this->backendUserAuthentication);
-        $this->formProtection = $formProtectionFactory->createForType('backend');
+        // @todo: this can be injected, when compat to TYPO3 11 is removed
+        //        FormProtectionFactory $formProtectionFactory,
+        //        $this->formProtection = $formProtectionFactory;
+        $this->formProtection = GeneralUtility::makeInstance(FormProtectionFactory::class)->createForType('backend');
     }
 
     public function addButton(ModifyButtonBarEvent $event): void
