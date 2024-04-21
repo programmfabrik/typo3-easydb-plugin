@@ -1,0 +1,18 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    Easydb\Typo3Integration\:
+        resource: '../Classes/*'
+
+    Easydb\Typo3Integration\Persistence\SystemLanguages:
+        public: true
+
+    Easydb\Typo3Integration\Hook\FileListButtonListener:
+        public: true
+        tags:
+            - name: event.listener
+              identifier: 'easydb-button-listener'
+              method: addButton

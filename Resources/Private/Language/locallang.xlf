@@ -12,9 +12,6 @@
             <trans-unit id="config.allowedFileExtensions">
                 <source>File extensions that shall be imported from easydb</source>
             </trans-unit>
-            <trans-unit id="config.defaultLocale">
-                <source>easydb locale for the TYPO3 default language</source>
-            </trans-unit>
             <trans-unit id="config.allowSessionTransfer">
                 <source>Allow to transfer the session to allow Chrome browser to work when session cookie is not sent.
                     (NOT RECOMMENDED)
@@ -33,7 +30,10 @@
                 <source>Updated file</source>
             </trans-unit>
             <trans-unit id="label.language.locale">
-                <source>easydb locale:</source>
+                <source>easydb Locale</source>
+            </trans-unit>
+            <trans-unit id="label.language.locale.description">
+                <source>Optional, locale as set in easydb - if empty, the information is retrieved from the locale</source>
             </trans-unit>
             <trans-unit id="label.easydb.info">
                 <source>easydb fields</source>

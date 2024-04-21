@@ -1,6 +1,4 @@
 <?php
-defined('TYPO3_MODE') or die;
-
 use Easydb\Typo3Integration\Form\Element\EasidbFileInfo;
 use Easydb\Typo3Integration\Hook\FileIndexRepository;
 use Easydb\Typo3Integration\Hook\FileListButtonHook;

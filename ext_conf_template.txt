@@ -2,7 +2,5 @@
 serverUrl =
 # cat=Settings; type=string; label=LLL:EXT:easydb/Resources/Private/Language/locallang.xlf:config.allowedFileExtensions
 allowedFileExtensions = jpg,tif,png
-# cat=Settings; type=string; label=LLL:EXT:easydb/Resources/Private/Language/locallang.xlf:config.defaultLocale
-defaultLocale = en-US
 # cat=Settings; type=boolean; label=LLL:EXT:easydb/Resources/Private/Language/locallang.xlf:config.allowSessionTransfer
 allowSessionTransfer = 0

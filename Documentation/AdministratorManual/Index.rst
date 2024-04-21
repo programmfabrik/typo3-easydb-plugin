@@ -68,22 +68,6 @@ File extensions that shall be imported from easydb
 
 A comma separated list of file extensions that are allowed to be imported into TYPO3.
 
-easydb locale for the TYPO3 default language
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-In case you have a multi language TYPO3 project, you need to provide a mapping between TYPO3 languages
-and easydb locales. In extension configuration you specify the easydb locale for the TYPO3 default language.
-
-easydb Locales for each TYPO3 language records, can be specified within the TYPO3 language record as shown
-in the following screen shot.
-
-.. figure:: ../Images/AdministratorManual/LocaleForLanguage.png
-	:width: 500px
-	:alt: easydb locale in TYPO3 language record
-
-	easydb locale in TYPO3 language record
-
-
 Allow Session Transfer
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -156,3 +140,21 @@ When choosing this option, recent TYPO3 security improvements on how session rec
 in the database are reverted and the cookie value of the TYPO3 session is again
 stored in clear text in the database. Therefore it is highly recommended to chose a different
 option from above.
+
+Mapping easydb locales to TYPO3 languages
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In case you have a multi language TYPO3 project, you need to provide a mapping between TYPO3 languages
+and easydb locales. By default the easydb locale is derived from the locale configured in your site(s).
+In case these differ, it is possible to explicitly set the `easydbLocale` for each language,
+as shown in the following screenshot.
+
+.. figure:: ../Images/AdministratorManual/LocaleForLanguage.png
+	:width: 500px
+	:alt: easydb locale in TYPO3 site language configuration
+
+	easydb locale in TYPO3 site language configuration
+
+It is important to note, that easydb locales must have a unique language id
+defined across all sites. Otherwise an error is thrown, because it would be
+impossible to determine which language uid to use for a given locale.

@@ -1,2 +1,36 @@
 parameters:
-	ignoreErrors: []
+	ignoreErrors:
+		-
+			message: "#^Call to an undefined method TYPO3\\\\CMS\\\\Core\\\\FormProtection\\\\FormProtectionFactory\\:\\:createForType\\(\\)\\.$#"
+			count: 1
+			path: Classes/Hook/FileListButtonListener.php
+
+		-
+			message: "#^Call to an undefined method TYPO3\\\\CMS\\\\Core\\\\Page\\\\PageRenderer\\:\\:loadJavaScriptModule\\(\\)\\.$#"
+			count: 1
+			path: Classes/Hook/FileListButtonListener.php
+
+		-
+			message: "#^Call to method getButtons\\(\\) on an unknown class TYPO3\\\\CMS\\\\Backend\\\\Template\\\\Components\\\\ModifyButtonBarEvent\\.$#"
+			count: 1
+			path: Classes/Hook/FileListButtonListener.php
+
+		-
+			message: "#^Call to method setButtons\\(\\) on an unknown class TYPO3\\\\CMS\\\\Backend\\\\Template\\\\Components\\\\ModifyButtonBarEvent\\.$#"
+			count: 1
+			path: Classes/Hook/FileListButtonListener.php
+
+		-
+			message: "#^Cannot assign offset 'easydb' to array\\|string\\.$#"
+			count: 1
+			path: Classes/Hook/FileListButtonListener.php
+
+		-
+			message: "#^Parameter \\$event of method Easydb\\\\Typo3Integration\\\\Hook\\\\FileListButtonListener\\:\\:addButton\\(\\) has invalid type TYPO3\\\\CMS\\\\Backend\\\\Template\\\\Components\\\\ModifyButtonBarEvent\\.$#"
+			count: 1
+			path: Classes/Hook/FileListButtonListener.php
+
+		-
+			message: "#^Instanceof between string and TYPO3\\\\CMS\\\\Core\\\\Localization\\\\Locale will always evaluate to false\\.$#"
+			count: 1
+			path: Classes/Persistence/SystemLanguages.php
