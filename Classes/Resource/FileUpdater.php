@@ -126,16 +126,20 @@ class FileUpdater
             $this->dataHandler,
             GeneralUtility::makeInstance(SystemLanguages::class)
         );
+        $fileProperties = $this->getFileFieldsFromFileData($fileData);
+        $fileProperties['storage'] = $file->getStorage()->getUid();
         $this->dataHandler->start(
             [
                 'sys_file' => [
-                    $file->getUid() => $this->getFileFieldsFromFileData($fileData),
+                    $file->getUid() => $fileProperties,
                 ],
                 'sys_file_metadata' => $metaDataProcessor->mapEasydbMetaDataToMetaDataRecords($fileData),
             ],
             []
         );
+        $this->dataHandler->isImporting = true;
         $this->dataHandler->process_datamap();
+        $this->dataHandler->isImporting = false;
     }
 
     /**
