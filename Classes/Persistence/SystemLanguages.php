@@ -91,15 +91,19 @@ class SystemLanguages
      */
     private function extractLocale(SiteLanguage $language): string
     {
-        $locale = (string)($language->toArray()['easydbLocale'] ?? $this->normalizeTypo3Locale($language));
+        $locale = $this->normalizeLocale($language);
         if ($locale === '') {
             throw new \LogicException(sprintf('Site Language %d has empty locale configured', $language->getLanguageId()), 1713697035);
         }
         return $locale;
     }
 
-    private function normalizeTypo3Locale(SiteLanguage $language): string
+    private function normalizeLocale(SiteLanguage $language): string
     {
+        $locale = (string)($language->toArray()['easydbLocale'] ?? '');
+        if ($locale !== '') {
+            return $locale;
+        }
         $typo3Locale = $language->getLocale();
         if ($typo3Locale instanceof Locale) {
             return $typo3Locale->getName();
