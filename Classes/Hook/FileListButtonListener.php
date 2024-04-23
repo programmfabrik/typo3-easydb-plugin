@@ -19,6 +19,8 @@ use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
+use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -78,37 +80,45 @@ class FileListButtonListener
         if (!$this->isFileListModuleUri()) {
             return $buttons;
         }
-        $this->pageRenderer->loadJavaScriptModule('@easydb/typo3-integration/easydb-adapter.js');
-        $buttons[ButtonBar::BUTTON_POSITION_LEFT][] = [];
-        $buttonBarIndex = count($buttons[ButtonBar::BUTTON_POSITION_LEFT]);
+        try {
+            $button = GeneralUtility::makeInstance(LinkButton::class);
+            $button->setShowLabelText(true);
+            $button->setIcon($this->iconFactory->getIcon('actions-file-add', Icon::SIZE_SMALL));
+            $button->setTitle($this->languageService->sL('LLL:EXT:easydb/Resources/Private/Language/locallang.xlf:button.addFiles'));
+            $button->setClasses('button__file-list-easydb');
+            $button->setDataAttributes(
+                [
+                    'arguments' => \json_encode(
+                        [
+                            'targetUrl' => $this->getTargetUrl(),
+                            'config' => \base64_encode(\json_encode([
+                                'callbackurl' => $this->getCallBackUrl(),
+                                'existing_files' => $this->getExistingFiles(),
+                                'extensions' => $this->getAllowedFileExtensions(),
+                            ], JSON_THROW_ON_ERROR)),
+                            'window' => $this->getWindowSize(),
+                        ],
+                        JSON_THROW_ON_ERROR
+                    ),
+                ]
+            );
 
-        $button = GeneralUtility::makeInstance(LinkButton::class);
-        $button->setShowLabelText(true);
-        $button->setIcon($this->iconFactory->getIcon('actions-file-add', Icon::SIZE_SMALL));
-        $button->setTitle($this->languageService->sL('LLL:EXT:easydb/Resources/Private/Language/locallang.xlf:button.addFiles'));
-        $button->setClasses('button__file-list-easydb');
-        $button->setDataAttributes(
-            [
-                'arguments' => \json_encode(
-                    [
-                        'targetUrl' => $this->getTargetUrl(),
-                        'config' => \base64_encode(\json_encode([
-                            'callbackurl' => $this->getCallBackUrl(),
-                            'existing_files' => $this->getExistingFiles(),
-                            'extensions' => $this->getAllowedFileExtensions(),
-                        ], JSON_THROW_ON_ERROR)),
-                        'window' => $this->getWindowSize(),
-                    ],
-                    JSON_THROW_ON_ERROR
-                ),
-            ]
-        );
+            $this->pageRenderer->loadJavaScriptModule('@easydb/typo3-integration/easydb-adapter.js');
+            $buttons[ButtonBar::BUTTON_POSITION_LEFT][] = [];
+            $buttonBarIndex = count($buttons[ButtonBar::BUTTON_POSITION_LEFT]);
+            $buttons[ButtonBar::BUTTON_POSITION_LEFT][$buttonBarIndex][] = $button;
+        } catch (InsufficientFolderAccessPermissionsException) {
 
-        $buttons[ButtonBar::BUTTON_POSITION_LEFT][$buttonBarIndex][] = $button;
+        }
 
         return $buttons;
     }
 
+    /**
+     * @throws InsufficientFolderAccessPermissionsException
+     * @throws RouteNotFoundException
+     * @throws \JsonException
+     */
     private function getTargetUrl(): string
     {
         // Encoding galore
@@ -130,11 +140,12 @@ class FileListButtonListener
     /**
      * @throws \InvalidArgumentException
      * @throws RouteNotFoundException
+     * @throws InsufficientFolderAccessPermissionsException
      */
     private function getCallBackUrl(): string
     {
         $uriArguments = [
-            'id' => $_GET['id'] ?? $this->getRootLevelFolder(),
+            'id' => $this->combinedIdentifierFromFolder($this->getCurrentFolder()),
             'importToken' => $this->formProtection->generateToken('easydb', 'fileImport'),
         ];
         if ($this->config->get('transferSession') === true) {
@@ -155,12 +166,11 @@ class FileListButtonListener
 
     /**
      * @return array{uid: string}[]
+     * @throws InsufficientFolderAccessPermissionsException
      */
     private function getExistingFiles(): array
     {
-        $folderId = $_GET['id'] ?? $this->getRootLevelFolder();
-
-        return (new FileUpdater($this->resourceFactory->getFolderObjectFromCombinedIdentifier($folderId)))->getFilesMap();
+        return (new FileUpdater($this->getCurrentFolder()))->getFilesMap();
     }
 
     /**
@@ -183,19 +193,36 @@ class FileListButtonListener
         return $this->backendUserAuthentication->uc['easydb']['windowSize'];
     }
 
-    private function getRootLevelFolder(): string
+    private function isFileListModuleUri(): bool
+    {
+        return str_contains(GeneralUtility::getIndpEnv('REQUEST_URI'), '/typo3/module/file/list');
+    }
+
+    /**
+     * @throws InsufficientFolderAccessPermissionsException
+     */
+    private function getCurrentFolder(): Folder
+    {
+        $folderId = $GLOBALS['TYPO3_REQUEST']?->getQueryParams()['id'] ?? $_GET['id'];
+        if (isset($folderId)) {
+            return $this->resourceFactory->getFolderObjectFromCombinedIdentifier($folderId);
+        }
+        return $this->getRootLevelFolder();
+    }
+
+    private function getRootLevelFolder(): Folder
     {
         // Take the first object of the first storage
         $fileStorages = $this->backendUserAuthentication->getFileStorages();
         $fileStorage = current($fileStorages);
         if ($fileStorage instanceof ResourceStorage) {
-            return $fileStorage->getUid() . ':' . $fileStorage->getRootLevelFolder()->getIdentifier();
+            return $fileStorage->getRootLevelFolder();
         }
-        throw new \RuntimeException('Could not find any folder to be displayed.', 1498569603);
+        throw new InsufficientFolderAccessPermissionsException('Could not find any folder to be displayed.', 1498569603);
     }
 
-    private function isFileListModuleUri(): bool
+    private function combinedIdentifierFromFolder(Folder $folder): string
     {
-        return str_contains(GeneralUtility::getIndpEnv('REQUEST_URI'), '/typo3/module/file/list');
+        return sprintf('%d:%s', $folder->getStorage()->getUid(), $folder->getIdentifier());
     }
 }
