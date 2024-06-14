@@ -1,7 +1,7 @@
 <?php
 $EM_CONF['easydb'] = [
-    'title' => 'easydb TYPO3 integration',
-    'description' => 'Integration of easydb asset management in TYPO3 CMS',
+    'title' => 'easydb / fylr TYPO3 integration',
+    'description' => 'Integration of easydb / fylr asset management in TYPO3',
     'category' => 'backend',
     'state' => 'stable',
     'uploadfolder' => 0,
