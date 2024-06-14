@@ -27,7 +27,7 @@ class EasydbRequest
      */
     public static function fromServerRequest(ServerRequestInterface $serverRequest): self
     {
-        if (!isset($serverRequest->getParsedBody()['body'])) {
+        if (!is_array($serverRequest->getParsedBody()) || !isset($serverRequest->getParsedBody()['body'])) {
             throw new \InvalidArgumentException('Invalid easydb request', 1498561326);
         }
         $parsedBody = \json_decode($serverRequest->getParsedBody()['body'], true, 512, JSON_THROW_ON_ERROR);
