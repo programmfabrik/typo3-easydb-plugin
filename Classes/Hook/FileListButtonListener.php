@@ -203,7 +203,7 @@ class FileListButtonListener
      */
     private function getCurrentFolder(): Folder
     {
-        $folderId = $GLOBALS['TYPO3_REQUEST']?->getQueryParams()['id'] ?? $_GET['id'];
+        $folderId = $GLOBALS['TYPO3_REQUEST']?->getQueryParams()['id'] ?? $_GET['id'] ?? null;
         if (isset($folderId)) {
             return $this->resourceFactory->getFolderObjectFromCombinedIdentifier($folderId);
         }
