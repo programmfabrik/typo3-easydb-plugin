@@ -12,7 +12,7 @@ use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 
 /**
  * That is the entry point for importing files
@@ -21,17 +21,16 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class ImportFilesController
 {
-    private ResourceFactory $resourceFactory;
+    private readonly FlashMessageQueue $messageQueue;
 
-    private FlashMessageQueue $messageQueue;
+    private readonly BackendUserAuthentication $backendUserAuthentication;
 
-    private BackendUserAuthentication $backendUserAuthentication;
-
-    public function __construct(ResourceFactory $resourceFactory = null, FlashMessageQueue $messageQueue = null, BackendUserAuthentication $backendUserAuthentication = null)
-    {
-        $this->resourceFactory = $resourceFactory ?? GeneralUtility::makeInstance(ResourceFactory::class);
-        $this->messageQueue = $messageQueue ?? GeneralUtility::makeInstance(FlashMessageService::class)->getMessageQueueByIdentifier();
-        $this->backendUserAuthentication = $backendUserAuthentication ?? $GLOBALS['BE_USER'];
+    public function __construct(
+        private readonly ResourceFactory $resourceFactory,
+        FlashMessageService $flashMessageService,
+    ) {
+        $this->messageQueue = $flashMessageService->getMessageQueueByIdentifier();
+        $this->backendUserAuthentication = $GLOBALS['BE_USER'];
     }
 
     public function importAction(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
@@ -52,7 +51,7 @@ class ImportFilesController
         }
 
         $addedFiles = [];
-        $userConfig = (array)$this->backendUserAuthentication->uc;
+        $userConfig = $this->backendUserAuthentication->uc;
         $userConfig['easydb']['windowSize'] = $easydbRequest->getWindowSize();
         $this->backendUserAuthentication->uc = $userConfig;
         $this->backendUserAuthentication->writeUC();
@@ -108,7 +107,7 @@ class ImportFilesController
             new FlashMessage(
                 $this->translate($languagePrefix . $message, $arguments),
                 $this->translate($languagePrefix . $message . $languageTitleSuffix),
-                FlashMessage::OK,
+                ContextualFeedbackSeverity::OK,
                 true
             )
         );

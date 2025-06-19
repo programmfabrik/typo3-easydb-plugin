@@ -161,7 +161,7 @@ class FileListButtonListener
 
     private function generateSessionId(): string
     {
-        return (new Session())->fetchEasyDbSessionByTypo3Session($this->backendUserAuthentication->id ?? '');
+        return (new Session())->fetchEasyDbSessionByTypo3Session($this->backendUserAuthentication->getSession()->getIdentifier());
     }
 
     /**

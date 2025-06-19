@@ -21,7 +21,7 @@ class MetaDataProcessor
     /**
      * @param array<int, array<string, scalar>> $metaData
      */
-    public function __construct(array $metaData, DataHandler $dataHandler = null, SystemLanguages $languages = null)
+    public function __construct(array $metaData, ?DataHandler $dataHandler = null, ?SystemLanguages $languages = null)
     {
         $this->metaData = $metaData;
         $this->dataHandler = $dataHandler ?? GeneralUtility::makeInstance(DataHandler::class);
