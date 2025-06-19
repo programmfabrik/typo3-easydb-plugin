@@ -15,7 +15,7 @@ class AjaxDispatcher
         CorsRequestHandler::class,
     ];
 
-    public function dispatchRequest(ServerRequestInterface $request, ResponseInterface $response = null): ResponseInterface
+    public function dispatchRequest(ServerRequestInterface $request, ?ResponseInterface $response = null): ResponseInterface
     {
         if ($response === null) {
             $response = new JsonResponse();
@@ -38,7 +38,7 @@ class AjaxDispatcher
     {
         $suitableRequestHandlers = [];
         foreach (self::requestHandlers as $requestHandlerClassName) {
-            /** @var RequestHandlerInterface $requestHandler */
+            /** @var DefaultRequestHandler|CorsRequestHandler $requestHandler */
             $requestHandler = GeneralUtility::makeInstance($requestHandlerClassName);
             if ($requestHandler->canHandleRequest($request)) {
                 $priority = $requestHandler->getPriority();

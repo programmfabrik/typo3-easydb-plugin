@@ -12,7 +12,6 @@ use Psr\Http\Server\RequestHandlerInterface;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Http\Response;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * This middleware takes care of sending CORS headers
@@ -21,11 +20,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class CorsMiddleware implements MiddlewareInterface
 {
-    private CorsRequestHandler $corsRequestHandler;
-
-    public function __construct(CorsRequestHandler $corsRequestHandler = null)
+    public function __construct(private readonly CorsRequestHandler $corsRequestHandler)
     {
-        $this->corsRequestHandler = $corsRequestHandler ?? GeneralUtility::makeInstance(CorsRequestHandler::class);
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

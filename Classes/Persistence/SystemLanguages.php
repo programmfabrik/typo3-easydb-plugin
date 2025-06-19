@@ -22,7 +22,6 @@ namespace Easydb\Typo3Integration\Persistence;
  ***************************************************************/
 
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
-use TYPO3\CMS\Core\Localization\Locale;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\CMS\Core\Site\SiteFinder;
 
@@ -104,10 +103,6 @@ class SystemLanguages
         if ($locale !== '') {
             return $locale;
         }
-        $typo3Locale = $language->getLocale();
-        if ($typo3Locale instanceof Locale) {
-            return $typo3Locale->getName();
-        }
-        return (new Locale($typo3Locale))->getName();
+        return $language->getLocale()->getName();
     }
 }
