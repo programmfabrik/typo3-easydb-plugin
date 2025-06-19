@@ -15,6 +15,7 @@ $configFinder = PhpCsFixer\Finder::create()
 $finder->append($configFinder);
 
 return (new PhpCsFixer\Config)
+    ->setUnsupportedPhpVersionAllowed(true)
     ->setRiskyAllowed(true)
     ->setRules([
         '@PSR2' => true,

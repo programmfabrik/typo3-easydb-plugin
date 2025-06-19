@@ -14,8 +14,8 @@ $EM_CONF['easydb'] = [
     'version' => '3.0.2',
     'constraints' => [
         'depends' => [
-            'typo3' => '11.5.36-12.4.99',
-            'php' => '7.4.0-8.99.99',
+            'typo3' => '12.4.14-13.4.99',
+            'php' => '8.2.0-8.99.99',
         ],
         'conflicts' => [],
         'suggests' => [],
