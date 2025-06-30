@@ -13,8 +13,6 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class CorsRequestHandler implements RequestHandlerInterface
 {
-    private ExtensionConfig $config;
-
     /**
      * Hard coded list of allowed CORS request methods
      */
@@ -25,9 +23,8 @@ class CorsRequestHandler implements RequestHandlerInterface
      */
     private const allowedHeaders = ['X-Requested-With'];
 
-    public function __construct(ExtensionConfig $config = null)
+    public function __construct(private readonly ExtensionConfig $config)
     {
-        $this->config = $config ?? new ExtensionConfig();
     }
 
     /**

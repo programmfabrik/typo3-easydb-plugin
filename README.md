@@ -30,3 +30,22 @@ The only thing you need to do is set the easydb locale that should be mapped to 
 language in the extension manager configuration and set the according easydb locale in each TYPO3 language record.
 
 ![Extension Manager Configuration](https://github.com/programmfabrik/typo3-easydb-plugin/raw/main/Documentation/Images/AdministratorManual/LocaleForLanguage.png)
+
+### Known problems with cross site cookies
+
+If you are experiencing problems with the upload into the TYPO3 server,
+and get errors like
+
+* "No cookie present"
+* "Are cross site cookies allowed in your browser?"
+
+then this means that your browser is blocking cookies, which are needed to authenticate in the TYPO3 server.
+This is most likely due to the security settings in your browser. 
+Depending on the browser you are using, 
+you need to update the settings to allow cross site cookies.
+
+For example, in Firefox it is necessary to change the settings for blocking cookies 
+from the most strict option "Cross-site tracking cookies, 
+and isolate other cross-site cookies" to "Cross-site tracking cookies", 
+so that the cross site cookie between easydb5/fylr and TYPO3 can be used. 
+For other browsers, there are similar security options.
