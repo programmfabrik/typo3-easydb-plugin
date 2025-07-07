@@ -131,7 +131,7 @@ class FileListButtonListener
             JSON_THROW_ON_ERROR
         )));
         return sprintf(
-            $serverUrl . '%stypo3filepicker=%s',
+            $serverUrl . '%slogin&typo3filepicker=%s',
             isset($parsedUrl['query']) ? '&' : '?',
             $filePickerArgument
         );
