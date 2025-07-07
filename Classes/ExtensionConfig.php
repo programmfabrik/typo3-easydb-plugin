@@ -20,11 +20,10 @@ class ExtensionConfig
     /**
      * @param array{serverUrl?: string, allowedFileExtensions?: string, defaultLocale?: string, allowSessionTransfer?: bool, transferSession?: bool, serverHostName?: string, allowedOrigin?: string}|null $config
      */
-    public function __construct(array $config = null)
+    public function __construct(?array $config = null)
     {
         $this->config = $config ?? $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][self::extensionKey] ?? [];
         $this->config = array_replace(self::defaults, $this->config);
-        $this->setDerivedConfigOptions();
     }
 
     /**
@@ -32,6 +31,9 @@ class ExtensionConfig
      */
     public function get(string $name)
     {
+        if (!array_key_exists('transferSession', $this->config)) {
+            $this->setDerivedConfigOptions();
+        }
         if (!array_key_exists($name, $this->config)) {
             throw new \InvalidArgumentException(sprintf('Configuration option "%s" does not exist', $name), 1498463301);
         }

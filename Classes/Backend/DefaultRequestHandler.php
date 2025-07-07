@@ -6,10 +6,8 @@ namespace Easydb\Typo3Integration\Backend;
 use Easydb\Typo3Integration\Controller\ImportFilesController;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
-use TYPO3\CMS\Core\FormProtection\AbstractFormProtection;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\FormProtection\FormProtectionFactory;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Checks if backend user is authenticated (client must sent the request "withCredentials")
@@ -17,29 +15,11 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class DefaultRequestHandler implements RequestHandlerInterface
 {
-    /**
-     * @var BackendUserAuthentication
-     */
-    private $userAuthentication;
-
-    /**
-     * @var AbstractFormProtection
-     */
-    private $formProtection;
-
-    /**
-     * @var ImportFilesController
-     */
-    private $importFilesController;
-
     public function __construct(
-        BackendUserAuthentication $userAuthentication = null,
-        AbstractFormProtection $formProtection = null,
-        ImportFilesController $importFilesController = null
+        private readonly Context $context,
+        private readonly FormProtectionFactory $formProtectionFactory,
+        private readonly ImportFilesController $importFilesController
     ) {
-        $this->userAuthentication = $userAuthentication ?? $GLOBALS['BE_USER'];
-        $this->formProtection = $formProtection ?? FormProtectionFactory::get('backend');
-        $this->importFilesController = $importFilesController ?? GeneralUtility::makeInstance(ImportFilesController::class);
     }
 
     /**
@@ -48,8 +28,8 @@ class DefaultRequestHandler implements RequestHandlerInterface
      */
     public function canHandleRequest(ServerRequestInterface $request): bool
     {
-        return !empty($this->userAuthentication->user['uid'])
-            && $this->formProtection->validateToken(
+        return $this->context->getPropertyFromAspect('backend.user', 'id') > 0
+            && $this->formProtectionFactory->createFromRequest($request)->validateToken(
                 $request->getQueryParams()['importToken'],
                 'easydb',
                 'fileImport'

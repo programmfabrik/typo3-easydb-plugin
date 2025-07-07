@@ -131,7 +131,7 @@ class FileListButtonListener
             JSON_THROW_ON_ERROR
         )));
         return sprintf(
-            $serverUrl . '%stypo3filepicker=%s',
+            $serverUrl . '%slogin&typo3filepicker=%s',
             isset($parsedUrl['query']) ? '&' : '?',
             $filePickerArgument
         );
@@ -161,7 +161,7 @@ class FileListButtonListener
 
     private function generateSessionId(): string
     {
-        return (new Session())->fetchEasyDbSessionByTypo3Session($this->backendUserAuthentication->id ?? '');
+        return (new Session())->fetchEasyDbSessionByTypo3Session($this->backendUserAuthentication->getSession()->getIdentifier());
     }
 
     /**
