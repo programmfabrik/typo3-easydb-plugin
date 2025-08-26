@@ -30,20 +30,11 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class FileListButtonListener
 {
-    /**
-     * @var LanguageService
-     */
-    private $languageService;
+    private LanguageService $languageService;
 
-    /**
-     * @var BackendUserAuthentication
-     */
-    private $backendUserAuthentication;
+    private BackendUserAuthentication $backendUserAuthentication;
 
-    /**
-     * @var AbstractFormProtection
-     */
-    private $formProtection;
+    private AbstractFormProtection $formProtection;
 
     public function __construct(
         private readonly ExtensionConfig $config,
@@ -52,15 +43,11 @@ class FileListButtonListener
         private readonly PageRenderer $pageRenderer,
         private readonly ResourceFactory $resourceFactory,
         LanguageServiceFactory $languageServiceFactory,
-        // @todo: this can be injected, when compat to TYPO3 11 is removed
-        //        FormProtectionFactory $formProtectionFactory,
+        FormProtectionFactory $formProtectionFactory,
     ) {
         $this->backendUserAuthentication = $GLOBALS['BE_USER'];
         $this->languageService = $languageServiceFactory->createFromUserPreferences($this->backendUserAuthentication);
-        // @todo: this can be injected, when compat to TYPO3 11 is removed
-        //        FormProtectionFactory $formProtectionFactory,
-        //        $this->formProtection = $formProtectionFactory;
-        $this->formProtection = GeneralUtility::makeInstance(FormProtectionFactory::class)->createForType('backend');
+        $this->formProtection = $formProtectionFactory->createForType('backend');
     }
 
     public function addButton(ModifyButtonBarEvent $event): void
