@@ -15,8 +15,8 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                typo3: [ '^11.5.36', '^12.4.14' ]
-                php: [ '8.1', '8.2' ]
+                typo3: [ '^12.4.14', '^13.4' ]
+                php: [ '8.2', '8.3', '8.4' ]
                 dependency-version: [ stable, lowest ]
                 experimental: [ false ]
 
@@ -72,7 +72,7 @@ jobs:
                 run: vendor/bin/php-cs-fixer fix -n --diff --format=checkstyle --dry-run | cs2pr --notices-as-warnings --colorize
 
             -   name: Phpstan
-                run: vendor/bin/phpstan analyse -c "phpstan${{ matrix.typo3 }}.neon" --error-format=checkstyle | cs2pr --notices-as-warnings --colorize
+                run: vendor/bin/phpstan analyse --error-format=checkstyle | cs2pr --notices-as-warnings --colorize
 
             -   name: Configure matchers
                 uses: mheap/phpunit-matcher-action@v1

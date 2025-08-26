@@ -27,23 +27,15 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Adds a button for importing files from easydb to the file list module
+ * @phpstan-import-type Buttons from ButtonBar
  */
 class FileListButtonListener
 {
-    /**
-     * @var LanguageService
-     */
-    private $languageService;
+    private LanguageService $languageService;
 
-    /**
-     * @var BackendUserAuthentication
-     */
-    private $backendUserAuthentication;
+    private BackendUserAuthentication $backendUserAuthentication;
 
-    /**
-     * @var AbstractFormProtection
-     */
-    private $formProtection;
+    private AbstractFormProtection $formProtection;
 
     public function __construct(
         private readonly ExtensionConfig $config,
@@ -52,15 +44,11 @@ class FileListButtonListener
         private readonly PageRenderer $pageRenderer,
         private readonly ResourceFactory $resourceFactory,
         LanguageServiceFactory $languageServiceFactory,
-        // @todo: this can be injected, when compat to TYPO3 11 is removed
-        //        FormProtectionFactory $formProtectionFactory,
+        FormProtectionFactory $formProtectionFactory,
     ) {
         $this->backendUserAuthentication = $GLOBALS['BE_USER'];
         $this->languageService = $languageServiceFactory->createFromUserPreferences($this->backendUserAuthentication);
-        // @todo: this can be injected, when compat to TYPO3 11 is removed
-        //        FormProtectionFactory $formProtectionFactory,
-        //        $this->formProtection = $formProtectionFactory;
-        $this->formProtection = GeneralUtility::makeInstance(FormProtectionFactory::class)->createForType('backend');
+        $this->formProtection = $formProtectionFactory->createForType('backend');
     }
 
     public function addButton(ModifyButtonBarEvent $event): void
@@ -70,8 +58,8 @@ class FileListButtonListener
     }
 
     /**
-     * @param array<string, mixed> $buttons
-     * @return array<string, mixed>
+     * @param Buttons $buttons
+     * @return Buttons
      * @throws \JsonException
      * @throws RouteNotFoundException
      */
@@ -131,7 +119,7 @@ class FileListButtonListener
             JSON_THROW_ON_ERROR
         )));
         return sprintf(
-            $serverUrl . '%stypo3filepicker=%s',
+            $serverUrl . '%slogin&typo3filepicker=%s',
             isset($parsedUrl['query']) ? '&' : '?',
             $filePickerArgument
         );
@@ -161,7 +149,7 @@ class FileListButtonListener
 
     private function generateSessionId(): string
     {
-        return (new Session())->fetchEasyDbSessionByTypo3Session($this->backendUserAuthentication->id ?? '');
+        return (new Session())->fetchEasyDbSessionByTypo3Session($this->backendUserAuthentication->getSession()->getIdentifier());
     }
 
     /**
