@@ -27,6 +27,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Adds a button for importing files from easydb to the file list module
+ * @phpstan-import-type Buttons from ButtonBar
  */
 class FileListButtonListener
 {
@@ -57,8 +58,8 @@ class FileListButtonListener
     }
 
     /**
-     * @param array<string, mixed> $buttons
-     * @return array<string, mixed>
+     * @param Buttons $buttons
+     * @return Buttons
      * @throws \JsonException
      * @throws RouteNotFoundException
      */
