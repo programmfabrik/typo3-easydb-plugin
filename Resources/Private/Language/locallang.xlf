@@ -4,13 +4,13 @@
         <header/>
         <body>
             <trans-unit id="button.addFiles">
-                <source>Add files from easydb</source>
+                <source>Add files from fylr</source>
             </trans-unit>
             <trans-unit id="config.easydbServerUrl">
-                <source>URL to your easydb server</source>
+                <source>URL to your fylr server</source>
             </trans-unit>
             <trans-unit id="config.allowedFileExtensions">
-                <source>File extensions that shall be imported from easydb</source>
+                <source>File extensions that shall be imported from fylr</source>
             </trans-unit>
             <trans-unit id="config.allowSessionTransfer">
                 <source>Allow to transfer the session to allow Chrome browser to work when session cookie is not sent.
@@ -18,25 +18,25 @@
                 </source>
             </trans-unit>
             <trans-unit id="action.insertFile">
-                <source>Added file "%1$s" from easydb</source>
+                <source>Added file "%1$s" from fylr</source>
             </trans-unit>
             <trans-unit id="action.insertFile.title">
                 <source>Added file</source>
             </trans-unit>
             <trans-unit id="action.updateFile">
-                <source>Updated file "%1$s" from easydb</source>
+                <source>Updated file "%1$s" from fylr</source>
             </trans-unit>
             <trans-unit id="action.updateFile.title">
                 <source>Updated file</source>
             </trans-unit>
             <trans-unit id="label.language.locale">
-                <source>easydb Locale</source>
+                <source>fylr Locale</source>
             </trans-unit>
             <trans-unit id="label.language.locale.description">
-                <source>Optional, locale as set in easydb - if empty, the information is retrieved from the locale</source>
+                <source>Optional, locale as set in fylr - if empty, the information is retrieved from the locale</source>
             </trans-unit>
             <trans-unit id="label.easydb.info">
-                <source>easydb fields</source>
+                <source>fylr fields</source>
             </trans-unit>
         </body>
     </file>
