@@ -19,6 +19,7 @@ use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
 use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
@@ -193,7 +194,11 @@ class FileListButtonListener
     {
         $folderId = $GLOBALS['TYPO3_REQUEST']?->getQueryParams()['id'] ?? $_GET['id'] ?? null;
         if (isset($folderId)) {
-            return $this->resourceFactory->getFolderObjectFromCombinedIdentifier($folderId);
+            try {
+                return $this->resourceFactory->getFolderObjectFromCombinedIdentifier($folderId);
+            } catch (FolderDoesNotExistException) {
+                return $this->getRootLevelFolder();
+            }
         }
         return $this->getRootLevelFolder();
     }
